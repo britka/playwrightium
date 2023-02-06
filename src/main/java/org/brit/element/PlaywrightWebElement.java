@@ -1,16 +1,18 @@
-package org.brit.driver;
+package org.brit.element;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.BoundingBox;
 import org.openqa.selenium.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class PWWebElement implements WebElement {
+public class PlaywrightWebElement implements WebElement {
 
     Locator locator;
 
-    public PWWebElement(Locator locator) {
+    public PlaywrightWebElement(Locator locator) {
         this.locator = locator;
     }
 
@@ -65,22 +67,28 @@ public class PWWebElement implements WebElement {
 
     @Override
     public List<WebElement> findElements(By by) {
-        return Collections.unmodifiableList(new LinkedList<PWWebElement>());
+        return getLocatorFromBy(by).all()
+                .stream().map(PlaywrightWebElement::new)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
     public WebElement findElement(By by) {
+       return new PlaywrightWebElement(getLocatorFromBy(by));
+    }
+
+    private Locator getLocatorFromBy(By by) {
         String using = ((By.Remotable) by).getRemoteParameters().using();
         String value = ((By.Remotable) by).getRemoteParameters().value().toString();
         return switch (using) {
-            case "css selector" -> new PWWebElement(locator.locator(value));
-            case "class name" -> new PWWebElement(locator.locator("xpath=.//*[@class='%s']".formatted(value)));
-            case "xpath" -> new PWWebElement(locator.locator("xpath=" + value));
-            case "tag name" -> new PWWebElement(locator.locator("xpath=.//" + value));
-            case "name" -> new PWWebElement(locator.locator("[name='%s']".formatted(value)));
-            case "partial link text" -> new PWWebElement(locator.locator("xpath=.//a[contains(.,'%s')]".formatted(value)));
-            case "link text" -> new PWWebElement(locator.locator("xpath=.//a[text()='%s']".formatted(value)));
-            case "id" -> new PWWebElement(locator.locator("#%s".formatted(value)));
+            case "css selector" -> locator.locator(value);
+            case "class name" -> locator.locator("xpath=.//*[@class='%s']".formatted(value));
+            case "xpath" -> locator.locator("xpath=" + value);
+            case "tag name" -> locator.locator("xpath=.//" + value);
+            case "name" -> locator.locator("[name='%s']".formatted(value));
+            case "partial link text" -> locator.locator("xpath=.//a[contains(.,'%s')]".formatted(value));
+            case "link text" -> locator.locator("xpath=.//a[text()='%s']".formatted(value));
+            case "id" -> locator.locator("#%s".formatted(value));
             default -> null;
         };
     }
@@ -122,6 +130,15 @@ public class PWWebElement implements WebElement {
 
     @Override
     public <X> X getScreenshotAs(OutputType<X> target) throws WebDriverException {
+        byte[] screenshot = locator.screenshot();
+
+        if (target.getClass() == OutputType.FILE.getClass()) {
+            return target.convertFromPngBytes(screenshot);
+        } else if (target.getClass() == OutputType.BYTES.getClass()) {
+            return (X) screenshot;
+        } else if (target.getClass() == OutputType.BASE64.getClass()) {
+            return (X) Base64.getEncoder().encodeToString(screenshot);
+        }
         return null;
     }
 }
