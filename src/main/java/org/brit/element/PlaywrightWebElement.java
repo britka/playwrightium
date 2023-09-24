@@ -1,16 +1,22 @@
 package org.brit.element;
 
-import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.Page;
+import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.BoundingBox;
 import org.openqa.selenium.*;
+import org.openqa.selenium.remote.RemoteWebElement;
 
-import java.util.*;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class PlaywrightWebElement implements WebElement {
+public class PlaywrightWebElement extends RemoteWebElement {
 
     Locator locator;
+    ElementHandle elementHandle;
 
     public PlaywrightWebElement(Locator locator) {
         this.locator = locator;
@@ -21,18 +27,40 @@ public class PlaywrightWebElement implements WebElement {
         locator.click();
     }
 
+    public void clickWithAlert(Consumer<Dialog> clickWithAlertOptions) {
+        locator
+                .page()
+                .onDialog(clickWithAlertOptions);
+        locator.click();
+    }
+
+    public File download() {
+        Download download = locator.page().waitForDownload(() -> {
+            locator.click();
+        });
+        return download.path().toFile();
+    }
+
+    public void upload(File file) {
+        locator.setInputFiles(file.toPath());
+    }
+
     @Override
     public void submit() {
-
+        locator.evaluate("locator => locator.submit();");
     }
 
     @Override
     public void sendKeys(CharSequence... keysToSend) {
         StringBuilder toSend = new StringBuilder();
-        for (CharSequence charSequence: keysToSend){
+        for (CharSequence charSequence : keysToSend) {
             toSend.append(charSequence);
         }
-        locator.type(toSend.toString());
+        if ("file".equals(locator.getAttribute("type"))) {
+            locator.setInputFiles(Paths.get(toSend.toString()));
+        } else {
+            locator.type(toSend.toString());
+        }
     }
 
     @Override
@@ -47,7 +75,14 @@ public class PlaywrightWebElement implements WebElement {
 
     @Override
     public String getAttribute(String name) {
-        return locator.getAttribute(name);
+        // sometimes relative href attribute is returned without leading /
+        if (name.equals("href"))
+            return locator.evaluate("node => node.href").toString();
+        String attributeValue = locator.getAttribute(name);
+        if (attributeValue == null) {
+            attributeValue = (String) locator.evaluate("node => node.%s".formatted(name));
+        }
+        return attributeValue;
     }
 
     @Override
@@ -74,7 +109,7 @@ public class PlaywrightWebElement implements WebElement {
 
     @Override
     public WebElement findElement(By by) {
-       return new PlaywrightWebElement(getLocatorFromBy(by));
+        return new PlaywrightWebElement(getLocatorFromBy(by).first());
     }
 
     private Locator getLocatorFromBy(By by) {
@@ -86,8 +121,8 @@ public class PlaywrightWebElement implements WebElement {
             case "xpath" -> locator.locator("xpath=" + value);
             case "tag name" -> locator.locator("xpath=.//" + value);
             case "name" -> locator.locator("[name='%s']".formatted(value));
-            case "partial link text" -> locator.locator("xpath=.//a[contains(.,'%s')]".formatted(value));
-            case "link text" -> locator.locator("xpath=.//a[text()='%s']".formatted(value));
+            case "partial link text", "link text" ->
+                    locator.locator("a", new Locator.LocatorOptions().setHasText(value));
             case "id" -> locator.locator("#%s".formatted(value));
             default -> null;
         };
@@ -122,8 +157,8 @@ public class PlaywrightWebElement implements WebElement {
     public String getCssValue(String propertyName) {
         return locator
                 .evaluate("element => " +
-                        "window.getComputedStyle(element).getPropertyValue('%s')"
-                                .formatted(propertyName))
+                          "window.getComputedStyle(element).getPropertyValue('%s')"
+                                  .formatted(propertyName))
                 .toString();
 
     }
@@ -141,4 +176,28 @@ public class PlaywrightWebElement implements WebElement {
         }
         return null;
     }
+
+    public Locator getLocator() {
+        return locator;
+    }
+
+    public ElementHandle getElementHandle() {
+        Page page = locator.page();
+
+        try {
+            Field selector = locator.getClass().getDeclaredField("selector");
+            selector.setAccessible(true);
+            String selectorString = selector.get(locator).toString();
+            elementHandle = page.querySelector(selectorString);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return elementHandle;
+    }
+
+    @Override
+    public String getDomAttribute(String name) {
+        return locator.getAttribute(name);
+    }
+
 }
