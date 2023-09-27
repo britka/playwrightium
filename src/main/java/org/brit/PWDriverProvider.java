@@ -18,7 +18,6 @@ public class PWDriverProvider implements WebDriverProvider {
         PlaywrightWebdriverOptions chromeOptions = new PlaywrightWebdriverOptions();
         chromeOptions.setCapability("headless", false);
         //Commands.getInstance().add("selectOption", new PlaywrightiumSelectOption());
-
         return new PlaywrightWebDriver(chromeOptions);
     }
 }

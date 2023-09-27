@@ -4,8 +4,8 @@ import com.codeborne.selenide.*;
 import com.codeborne.selenide.commands.SelectOptionByTextOrIndex;
 import com.github.javafaker.Faker;
 import org.apache.commons.io.FileUtils;
-import org.brit.additional.ClickAndConfirmModal;
 import org.brit.additional.ClickAndConfirmReturnTextModal;
+import org.brit.driver.PlaywrightWebDriver;
 import org.brit.element.PlaywrightWebElement;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -166,14 +166,14 @@ public class Tests {
         comments.setValue(someText).click();
         sleep(2000);
         actions()
-               // .keyDown(Keys.META)
+                // .keyDown(Keys.META)
                 .sendKeys(Keys.META, "A")
-               // .keyUp(Keys.META)
+                // .keyUp(Keys.META)
                 .sendKeys(Keys.META, "C")
                 .sendKeys(Keys.DELETE)
-               // .keyDown(Keys.META)
+                // .keyDown(Keys.META)
                 .sendKeys(Keys.META, "V")
-               // .keyUp(Keys.META)
+                // .keyUp(Keys.META)
                 .build()
                 .perform();
         String text = comments.text();
@@ -248,14 +248,25 @@ public class Tests {
     public void test9() {
         open("http://the-internet.herokuapp.com/javascript_alerts");
 
-        Selenide.zoom(2);
+//        Alert playwrightuimAlert =  switchTo().alert();
+//        playwrightuimAlert.sendKeys("Some text");
 
-        $(byText("Click for JS Confirm")).execute(new ClickAndConfirmModal());
-        $("#result").shouldHave(text("You clicked: Ok"));
+        prompt("Some text");
+        $(byText("Click for JS Prompt")).click();
+        $("#result").shouldHave(text("You entered: Some text"));
 
-        String clickForJsConfirm = $(byText("Click for JS Confirm")).execute(new ClickAndConfirmReturnTextModal());
-        assertThat(clickForJsConfirm)
-                .isEqualTo("I am a JS Confirm");
+        confirm();
+        $(byText("Click for JS Alert")).click();
+        $("#result").shouldHave(text("You successfully clicked an alert"));
+
+        dismiss();
+        $(byText("Click for JS Confirm")).click();
+        $("#result").shouldHave(text("You clicked: Cancel"));
+
+
+//        String clickForJsConfirm = $(byText("Click for JS Confirm")).execute(new ClickAndConfirmReturnTextModal());
+//        assertThat(clickForJsConfirm)
+//                .isEqualTo("I am a JS Confirm");
     }
 
 
@@ -304,7 +315,7 @@ public class Tests {
 
 
     @Test
-    public void switchWindows(){
+    public void switchWindows() {
         open("http://the-internet.herokuapp.com/windows");
 
         String windowHandle = webdriver().object().getWindowHandle();

@@ -1,10 +1,11 @@
 package org.brit.driver;
 
-import com.codeborne.selenide.impl.DurationFormat;
 import com.codeborne.selenide.impl.WebElementSource;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.MouseButton;
 import com.microsoft.playwright.options.ViewportSize;
+import lombok.Data;
+import lombok.experimental.Accessors;
 import org.apache.commons.text.CaseUtils;
 import org.brit.element.PlaywrightWebElement;
 import org.brit.options.PlaywrightWebdriverOptions;
@@ -19,9 +20,10 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
@@ -418,9 +420,78 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public Alert alert() {
-            return null;
+            return new PlaywrightuimAlert();
         }
     }
+
+    private class PlaywrightuimAlert implements Alert {
+
+        private AtomicReference<String> text = new AtomicReference<>();
+
+        LinkedList<AlertAction> alertActions = new LinkedList<>();
+
+        Consumer<Dialog> handler;
+
+
+        public PlaywrightuimAlert() {
+            handler = new Consumer<Dialog>() {
+                @Override
+                public void accept(Dialog dialog) {
+                    for (AlertAction action : alertActions) {
+                        switch (action.action()) {
+                            case "dismiss" -> dialog.dismiss();
+                            case "accept" -> dialog.accept();
+                            case "getText" -> text.set(dialog.message());
+                            case "sendKeys" -> dialog.accept(action.sendKeys());
+                        }
+                    }
+                    page.offDialog(this);
+                }
+            };
+            alertActions.add(new AlertAction().action("getText"));
+            addToHandler();
+        }
+
+        @Override
+        public void dismiss() {
+            page.offDialog(handler);
+            alertActions.add(new AlertAction().action("dismiss"));
+            addToHandler();
+        }
+
+        @Override
+        public void accept() {
+            page.offDialog(handler);
+            if (alertActions.stream().noneMatch(p -> p.action().equals("sendKeys"))) {
+                alertActions.add(new AlertAction().action("accept"));
+            }
+            addToHandler();
+        }
+
+        @Override
+        public String getText() {
+            return text.get();
+        }
+
+        @Override
+        public void sendKeys(String keysToSend) {
+            page.offDialog(handler);
+            alertActions.add(new AlertAction().action("sendKeys").sendKeys(keysToSend));
+            addToHandler();
+        }
+
+        private void addToHandler() {
+            page.onDialog(handler);
+        }
+
+        @Data
+        @Accessors(fluent = true)
+        private static class AlertAction {
+            public String action;
+            public String sendKeys;
+        }
+    }
+
 
     public class PlaywrightWebdriverTimeouts implements Timeouts {
         public PlaywrightWebdriverTimeouts() {
@@ -497,8 +568,8 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public Point getPosition() {
-            Integer x = (Integer)page.evaluate("() => window.screenX");
-            Integer y = (Integer)page.evaluate("() => window.screenY");
+            Integer x = (Integer) page.evaluate("() => window.screenX");
+            Integer y = (Integer) page.evaluate("() => window.screenY");
             return new Point(x, y);
         }
 
