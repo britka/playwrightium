@@ -1,0 +1,22 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  playwright:
+    name: 'Playwright Tests'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright/java:v1.38.0-jammy
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Build & Install
+        run: mvn -B install -D skipTests --no-transfer-progress
+      - name: Run tests
+        run: mvn test
