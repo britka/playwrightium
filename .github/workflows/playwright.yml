@@ -19,4 +19,4 @@ jobs:
       - name: Build & Install
         run: mvn -B install -D skipTests --no-transfer-progress
       - name: Run tests
-        run: Xvfb -ac :99 -screen 0 1280x1024x16 & export DISPLAY=:99 & mvn test
+        run: xvfb-run mvn test
