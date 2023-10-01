@@ -16,6 +16,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Xvfb install
+        run: sudo apt install xvfb
       - name: Build & Install
         run: mvn -B install -D skipTests --no-transfer-progress
       - name: Run tests
