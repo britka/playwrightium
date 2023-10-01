@@ -37,7 +37,7 @@ public class Tests {
         Configuration.downloadsFolder = "downloads";
         Configuration.baseUrl = "http://the-internet.herokuapp.com";
         Configuration.headless = false;
-        Configuration.timeout = 15000;
+        Configuration.timeout = 16000;
         Configuration.browserSize = "1880x960";
 
 //        ChromeOptions chromeOptions = new ChromeOptions();
