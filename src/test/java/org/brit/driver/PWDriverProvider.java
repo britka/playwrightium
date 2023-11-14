@@ -1,9 +1,6 @@
-package org.brit;
+package org.brit.driver;
 
 import com.codeborne.selenide.WebDriverProvider;
-import com.codeborne.selenide.commands.Commands;
-import org.brit.additional.PlaywrightiumSelectOption;
-import org.brit.driver.PlaywrightWebDriver;
 import org.brit.options.PlaywrightWebdriverOptions;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
@@ -17,7 +14,7 @@ public class PWDriverProvider implements WebDriverProvider {
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
         PlaywrightWebdriverOptions chromeOptions = new PlaywrightWebdriverOptions();
         chromeOptions.setCapability("headless", false);
-        //Commands.getInstance().add("selectOption", new PlaywrightiumSelectOption());
-        return new PlaywrightWebDriver(chromeOptions);
+        chromeOptions.setCapability("browserName", "chromium");
+        return new PlaywrightiumDriver(chromeOptions);
     }
 }

@@ -1,4 +1,4 @@
-package org.brit;
+package org.brit.test;
 
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;

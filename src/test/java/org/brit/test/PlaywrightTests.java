@@ -1,30 +1,56 @@
-package org.brit;
+package org.brit.test;
 
 import com.github.javafaker.Faker;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.Frame.GetByRoleOptions;
 import com.microsoft.playwright.options.AriaRole;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import org.apache.hc.core5.net.URIBuilder;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.net.URI;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class PlaywrightTests {
 
-    Playwright playwright = Playwright.create();
+    Playwright playwright;
     BrowserContext browserContext;
 
     @BeforeClass
     public void beforeClass() {
         //System.setProperty("SELENIUM_REMOTE_URL", "http://localhost:4444/wd/hub");
+//        Dotenv load = Dotenv.configure().systemProperties().load();
+//        browserContext = playwright.chromium()
+//                .connect(load.get("PLAYWRIGHT_SERVICE_URL") + "?cap={\"os\": \"linux\", \"runId\":\"%s\"}".formatted(new Date().getTime()),
+//                        new BrowserType.ConnectOptions().setHeaders(
+//                                Map.of("x-mpt-access-key", load.get("PLAYWRIGHT_SERVICE_ACCESS_TOKEN"))
+//                        ))
+//                .newContext();
+
+        Map<String,String> env = new HashMap<>();
+        env.put("SELENIUM_REMOTE_URL","http://localhost:4444/wd/hub");
+        playwright = Playwright.create(new Playwright.CreateOptions().setEnv(env));
         browserContext = playwright.chromium().launch(
-                        new BrowserType.LaunchOptions().setHeadless(false)
+                        new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(1000)
                                 .setDownloadsPath(Path.of("downloads")))
                 .newContext(new Browser.NewContextOptions().setAcceptDownloads(true));
+    }
+
+    @AfterClass
+    public void afterClass() {
+        browserContext.close();
+        playwright.close();
     }
 
     @Test
@@ -33,6 +59,7 @@ public class PlaywrightTests {
         page.navigate("http://the-internet.herokuapp.com/download");
         page.locator("//a[text()='file.txt']").click();
         System.out.println();
+        page.close();
     }
 
     @Test
@@ -43,6 +70,20 @@ public class PlaywrightTests {
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Click for JS Alert")).click();
 
         String content = waitForPopup.content();
+    }
+
+    @Test
+    public void testTest1() {
+        Page page = browserContext.newPage();
+        page.navigate("http://the-internet.herokuapp.com/hovers");
+        Locator figures = page.locator(".figure");
+        int count = 1;
+        for (Locator figure : figures.all()) {
+            figure.hover();
+            assertThat(figure.locator("xpath=./div/h5")).hasText("name: user" + count);
+            count++;
+        }
+        page.close();
     }
 
     @Test
@@ -87,6 +128,14 @@ public class PlaywrightTests {
         keyboard.press("Meta+v");
 
 
+    }
+
+    @Test
+    public void toPdf(){
+        Page page = browserContext.newPage();
+        page.navigate("https://www.selenium.dev/blog/2021/a-tour-of-4-authentication/");
+        page.pdf(new Page.PdfOptions().setPath(Paths.get("asPdf.pdf")).setPreferCSSPageSize(true)
+                .setLandscape(true));
     }
 
     @Test

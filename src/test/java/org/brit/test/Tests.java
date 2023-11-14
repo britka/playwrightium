@@ -1,11 +1,11 @@
-package org.brit;
+package org.brit.test;
 
 import com.codeborne.selenide.*;
+import com.codeborne.selenide.Credentials;
 import com.codeborne.selenide.commands.SelectOptionByTextOrIndex;
 import com.github.javafaker.Faker;
 import org.apache.commons.io.FileUtils;
-import org.brit.additional.ClickAndConfirmReturnTextModal;
-import org.brit.driver.PlaywrightWebDriver;
+import org.brit.driver.PWDriverProvider;
 import org.brit.element.PlaywrightWebElement;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -77,6 +77,16 @@ public class Tests {
         File screenshot = screenshot(OutputType.FILE);
         FileUtils.copyFile(screenshot, new File("screen.png"));
         sleep(2000);
+    }
+
+
+    @Test
+    public void testBasicAuth() {
+        open("http://the-internet.herokuapp.com/basic_auth",
+                AuthenticationType.BASIC,
+                new BasicAuthCredentials("admin", "admin"));
+        clearBrowserCookies();
+        $(".example>p").shouldHave(text("Congratulations! You must have the proper credentials."));
     }
 
 

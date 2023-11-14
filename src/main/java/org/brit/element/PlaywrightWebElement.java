@@ -59,7 +59,7 @@ public class PlaywrightWebElement extends RemoteWebElement {
         if ("file".equals(locator.getAttribute("type"))) {
             locator.setInputFiles(Paths.get(toSend.toString()));
         } else {
-            locator.type(toSend.toString());
+            locator.fill(toSend.toString());
         }
     }
 

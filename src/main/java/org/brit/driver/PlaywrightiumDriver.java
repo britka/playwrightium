@@ -13,6 +13,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.logging.Logs;
+import org.openqa.selenium.print.PrintOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.lang.reflect.Field;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
+public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
     private Playwright playwright;
     private BrowserContext browserContext;
     private Page page;
@@ -36,30 +37,47 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
     private Frame mainFrameCopy = null;
 
 
-    public PlaywrightWebDriver() {
+    public PlaywrightiumDriver() {
         playwright = Playwright.create();
-        browserContext = playwright
-                .chromium()
+        browserContext = getBrowserType("chromium")
                 .launch(new BrowserType.LaunchOptions().setHeadless(false).setDownloadsPath(Paths.get("downloads")))
                 .newContext(new Browser.NewContextOptions().setViewportSize(null).setAcceptDownloads(true));
         page = browserContext.newPage();
     }
 
-    public PlaywrightWebDriver(PlaywrightWebdriverOptions options) {
+    public PlaywrightiumDriver(PlaywrightWebdriverOptions options) {
         playwright = Playwright.create();
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
         Boolean headless = (Boolean) options.getCapability("headless");
         launchOptions.setHeadless(headless).setDownloadsPath(Paths.get("downloads"));
+        String browserType = (String) options.getCapability("browserName");
         //    .setChannel("chrome");
-        browserContext = playwright
-                .chromium()
+
+
+        browserContext = getBrowserType(browserType)
                 .launch(launchOptions)
                 .newContext(new Browser.NewContextOptions().setAcceptDownloads(true));
         page = browserContext.newPage();
         // page.setViewportSize(1024, 768);
     }
 
-    public PlaywrightWebDriver(String connectUrl) {
+
+    private BrowserType getBrowserType(String browser) {
+        switch (browser) {
+            case "chromium" -> {
+                return playwright.chromium();
+            }
+            case "firefox" -> {
+                return playwright.firefox();
+            }
+            case "webkit" -> {
+                return playwright.webkit();
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + browser);
+        }
+    }
+
+    public PlaywrightiumDriver(String connectUrl) {
         playwright = Playwright.create();
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
 
@@ -139,11 +157,11 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
     public Set<String> getWindowHandles() {
         Set<String> handles = new LinkedHashSet<>();
         try {
-            PlaywrightWebDriver.this.page.bringToFront();
+            PlaywrightiumDriver.this.page.bringToFront();
         } catch (Exception ignore) {
 
         }
-        List<Page> pages = PlaywrightWebDriver.this.page.context().pages();
+        List<Page> pages = PlaywrightiumDriver.this.page.context().pages();
         for (Page pageTemp : pages) {
             Field guid = null;
             try {
@@ -332,7 +350,7 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
         public WebDriver frame(int index) {
             Frame frame = page.frames().get(index);
             setMainFrame(frame);
-            return PlaywrightWebDriver.this;
+            return PlaywrightiumDriver.this;
         }
 
         @Override
@@ -340,7 +358,7 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
             Locator frameLocator = page.locator("[name='%s'], #%s".formatted(nameOrId, nameOrId));
             Frame frame = page.frame(frameLocator.getAttribute("name"));
             setMainFrame(frame);
-            return PlaywrightWebDriver.this;
+            return PlaywrightiumDriver.this;
         }
 
         @Override
@@ -369,7 +387,7 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
         @Override
         public WebDriver parentFrame() {
             page.mainFrame().parentFrame();
-            return PlaywrightWebDriver.this;
+            return PlaywrightiumDriver.this;
         }
 
         @Override
@@ -382,13 +400,13 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
                     String evaluate = (String) pageElement.evaluate("page => window.name");
                     if (guid.get(pageElement).toString().equals(nameOrHandle) || nameOrHandle.equals(evaluate)) {
                         pageElement.bringToFront();
-                        PlaywrightWebDriver.this.page = pageElement;
+                        PlaywrightiumDriver.this.page = pageElement;
                     }
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             }
-            return PlaywrightWebDriver.this;
+            return PlaywrightiumDriver.this;
         }
 
         @Override
@@ -409,7 +427,7 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
                     throw new RuntimeException(e);
                 }
             }
-            return PlaywrightWebDriver.this;
+            return PlaywrightiumDriver.this;
         }
 
         @Override
@@ -439,7 +457,10 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
                 public void accept(Dialog dialog) {
                     for (AlertAction action : alertActions) {
                         switch (action.action()) {
-                            case "dismiss" -> dialog.dismiss();
+                            case "dismiss" -> {
+                                page.offDialog(this);
+                                dialog.dismiss();
+                            }
                             case "accept" -> dialog.accept();
                             case "getText" -> text.set(dialog.message());
                             case "sendKeys" -> dialog.accept(action.sendKeys());
@@ -557,13 +578,13 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public Dimension getSize() {
-            ViewportSize viewportSize = PlaywrightWebDriver.this.page.viewportSize();
+            ViewportSize viewportSize = PlaywrightiumDriver.this.page.viewportSize();
             return new Dimension(viewportSize.width, viewportSize.height);
         }
 
         @Override
         public void setSize(Dimension targetSize) {
-            PlaywrightWebDriver.this.page.setViewportSize(targetSize.getWidth(), targetSize.getHeight());
+            PlaywrightiumDriver.this.page.setViewportSize(targetSize.getWidth(), targetSize.getHeight());
         }
 
         @Override
@@ -739,6 +760,16 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
             } else if (args[i] instanceof WebElement) {
                 Locator locator = ((PlaywrightWebElement) args[i]).getLocator();
                 elementHandle = locator.elementHandle();
+            } else if (args[i] instanceof Collection<?>) {
+                ArrayList<Object> arrayList = new ArrayList<>((Collection<?>) args[i]);
+                if (!arrayList.isEmpty() && arrayList.get(0) instanceof WebElement) {
+                    List<ElementHandle> list = arrayList.stream().map(e -> {
+                        Locator locator = ((PlaywrightWebElement) e).getLocator();
+                        return locator.elementHandle();
+                    }).toList();
+                    result.add(list);
+                    continue;
+                }
             }
             if (elementHandle != null) {
                 result.add(elementHandle);
@@ -790,4 +821,11 @@ public class PlaywrightWebDriver extends RemoteWebDriver implements TakesScreens
 
     }
 
+//    @Override
+//    public Pdf print(PrintOptions printOptions) throws WebDriverException {
+//        Page.PdfOptions pdfOptions = new Page.PdfOptions();
+//        //pdfOptions.
+//        printOptions.
+//        page.pdf()
+//    }
 }
