@@ -35,7 +35,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     public PlaywrightiumDriver() {
         playwright = Playwright.create();
         browserContext = getBrowserType("chromium")
-                .launch(new BrowserType.LaunchOptions().setHeadless(false).setDownloadsPath(Paths.get("downloads")))
+                .launch(new BrowserType.LaunchOptions().setHeadless(true).setDownloadsPath(Paths.get("downloads")))
                 .newContext(new Browser.NewContextOptions().setViewportSize(null).setAcceptDownloads(true));
         page = browserContext.newPage();
     }

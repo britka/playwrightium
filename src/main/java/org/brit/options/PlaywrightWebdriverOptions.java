@@ -6,19 +6,19 @@ public class PlaywrightWebdriverOptions extends MutableCapabilities {
 
     public PlaywrightWebdriverOptions() {
         super();
-        setHeadless(false);
+        setHeadless(true);
         setBrowserName("chromium");
     }
 
-    public void setHeadless(boolean headless){
+    public void setHeadless(boolean headless) {
         setCapability("headless", headless);
     }
 
-    public Boolean getHeadless(){
+    public Boolean getHeadless() {
         return (Boolean) getCapability("headless");
     }
 
-    public void setBrowserName(String browserName){
+    public void setBrowserName(String browserName) {
         setCapability("browserName", browserName);
     }
 }
