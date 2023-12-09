@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BasicTests {
+public class SelenideBasicTests {
     @Test
     public void basicFunctionalTests() {
 
