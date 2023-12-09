@@ -1,4 +1,4 @@
-# Playwright-to-webdriver
+# Playwrightium
 
 ## The story
 I like Java. I like [Selenium](https://selenium.dev/). I like [Selenide](https://selenide.org/).
