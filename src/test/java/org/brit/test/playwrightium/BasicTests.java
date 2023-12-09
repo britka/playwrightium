@@ -3,35 +3,38 @@ package org.brit.test.playwrightium;
 import com.github.javafaker.Faker;
 import org.brit.additional.PlaywrightiumSelect;
 import org.brit.driver.PlaywrightiumDriver;
-import org.openqa.selenium.*;
-import org.openqa.selenium.print.PrintOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.ISelect;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import java.io.File;
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.atomicStampedReference;
 
 public class BasicTests {
 
-    WebDriver driver;
+    static WebDriver driver;
 
-    @BeforeClass
-    public void beforeClass() {
+    @BeforeAll
+    public static void beforeClass() {
         driver = new PlaywrightiumDriver();
     }
 
-    @AfterClass
-    public void afterClass() {
+    @AfterAll
+    public static void afterClass() {
         if (driver != null) {
             driver.quit();
         }
@@ -110,7 +113,8 @@ public class BasicTests {
 
     }
 
-    @Test(dataProvider = "dataProvider")
+    @ParameterizedTest
+    @MethodSource("dataProvider")
     public void framesTest(String frameName, String frameText, int elementsCount) {
         driver.get("https://testpages.eviltester.com/styled/frames/frames-test.html");
         driver.switchTo().frame(frameName);
@@ -148,30 +152,29 @@ public class BasicTests {
 
         String testString = "Test string";
 
-//        alert = driver.switchTo().alert();
-//        alert.sendKeys(testString);
-//        alert.accept();
-//        driver.findElement(By.id("promptexample")).click();
-//        assertThat(alert.getText()).isEqualTo("I prompt you");
-//        assertThat(driver.findElement(By.id("promptexplanation")).getText()).isEqualTo("You clicked OK. 'prompt' returned  " + testString);
-//        assertThat(driver.findElement(By.id("promptreturn")).getText()).isEqualTo(testString);
+        alert = driver.switchTo().alert();
+        alert.sendKeys(testString);
+        alert.accept();
+        driver.findElement(By.id("promptexample")).click();
+        assertThat(alert.getText()).isEqualTo("I prompt you");
+        assertThat(driver.findElement(By.id("promptexplanation")).getText()).isEqualTo("You clicked OK. 'prompt' returned  " + testString);
+        assertThat(driver.findElement(By.id("promptreturn")).getText()).isEqualTo(testString);
 
         alert = driver.switchTo().alert();
         alert.sendKeys(testString);
-       // alert.dismiss();
+        alert.dismiss();
         driver.findElement(By.id("promptexample")).click();
         assertThat(alert.getText()).isEqualTo("I prompt you");
         assertThat(driver.findElement(By.id("promptexplanation")).getText()).isEqualTo("You clicked Cancel. 'prompt' returned null");
     }
 
 
-    @DataProvider
-    private Object[][] dataProvider() {
-        return new Object[][]{
-                {"left", "Left", 30},
-                {"middle", "Middle", 40},
-                {"right", "Right", 50}
-        };
+    private static Stream<Arguments> dataProvider() {
+        return Stream.of(
+                Arguments.of("left", "Left", 30),
+                Arguments.of("middle", "Middle", 40),
+                Arguments.of("right", "Right", 50)
+        );
     }
 
     private String getWebElementTextById(String id, WebDriver driver) {

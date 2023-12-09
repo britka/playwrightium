@@ -13,8 +13,7 @@ public class PWDriverProvider implements WebDriverProvider {
     @Override
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
         PlaywrightWebdriverOptions chromeOptions = new PlaywrightWebdriverOptions();
-        chromeOptions.setCapability("headless", false);
-        chromeOptions.setCapability("browserName", "chromium");
+        chromeOptions.merge(capabilities);
         return new PlaywrightiumDriver(chromeOptions);
     }
 }

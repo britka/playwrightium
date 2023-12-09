@@ -4,8 +4,6 @@ import com.codeborne.selenide.impl.WebElementSource;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.MouseButton;
 import com.microsoft.playwright.options.ViewportSize;
-import lombok.Data;
-import lombok.experimental.Accessors;
 import org.apache.commons.text.CaseUtils;
 import org.brit.element.PlaywrightWebElement;
 import org.brit.options.PlaywrightWebdriverOptions;
@@ -13,7 +11,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.logging.Logs;
-import org.openqa.selenium.print.PrintOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.lang.reflect.Field;
@@ -23,14 +20,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
     private Playwright playwright;
     private BrowserContext browserContext;
-    private Page page;
+    protected Page page;
 
     private Page activePage;
 
@@ -81,15 +76,15 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         playwright = Playwright.create();
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
 
-        connectUrl = connectUrl.replace("https", "wss")
+        connectUrl = connectUrl.replace("https:", "wss:")
                 .replace("http:", "ws:")
                 .replace("/wd/hub", "");
-        connectUrl = connectUrl + "/playwright/chromium/playwright-1.36.0?headless=true";
+        connectUrl = connectUrl + "/playwright/firefox/playwright-1.39.0?headless=true";
 
         // Boolean headless = (Boolean) capabilities.getCapability("headless");
-        launchOptions.setHeadless(false).setDownloadsPath(Paths.get("downloads"));
+        launchOptions.setHeadless(true).setDownloadsPath(Paths.get("downloads"));
         browserContext = playwright
-                .chromium()
+                .firefox()
                 .connect(connectUrl)
                 .newContext(new Browser.NewContextOptions().setAcceptDownloads(true));
         page = browserContext.newPage();
@@ -438,78 +433,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public Alert alert() {
-            return new PlaywrightuimAlert();
-        }
-    }
-
-    private class PlaywrightuimAlert implements Alert {
-
-        private AtomicReference<String> text = new AtomicReference<>();
-
-        LinkedList<AlertAction> alertActions = new LinkedList<>();
-
-        Consumer<Dialog> handler;
-
-
-        public PlaywrightuimAlert() {
-            handler = new Consumer<Dialog>() {
-                @Override
-                public void accept(Dialog dialog) {
-                    for (AlertAction action : alertActions) {
-                        switch (action.action()) {
-                            case "dismiss" -> {
-                                page.offDialog(this);
-                                dialog.dismiss();
-                            }
-                            case "accept" -> dialog.accept();
-                            case "getText" -> text.set(dialog.message());
-                            case "sendKeys" -> dialog.accept(action.sendKeys());
-                        }
-                    }
-                    page.offDialog(this);
-                }
-            };
-            alertActions.add(new AlertAction().action("getText"));
-            addToHandler();
-        }
-
-        @Override
-        public void dismiss() {
-            page.offDialog(handler);
-            alertActions.add(new AlertAction().action("dismiss"));
-            addToHandler();
-        }
-
-        @Override
-        public void accept() {
-            page.offDialog(handler);
-            if (alertActions.stream().noneMatch(p -> p.action().equals("sendKeys"))) {
-                alertActions.add(new AlertAction().action("accept"));
-            }
-            addToHandler();
-        }
-
-        @Override
-        public String getText() {
-            return text.get();
-        }
-
-        @Override
-        public void sendKeys(String keysToSend) {
-            page.offDialog(handler);
-            alertActions.add(new AlertAction().action("sendKeys").sendKeys(keysToSend));
-            addToHandler();
-        }
-
-        private void addToHandler() {
-            page.onDialog(handler);
-        }
-
-        @Data
-        @Accessors(fluent = true)
-        private static class AlertAction {
-            public String action;
-            public String sendKeys;
+            return new PlaywrightuimAlert(PlaywrightiumDriver.this);
         }
     }
 
@@ -751,17 +675,17 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     private List<Object> transformArguments(Object... args) {
         List<Object> result = new LinkedList<>();
-        for (int i = 0; i < args.length; i++) {
+        for (Object arg : args) {
             ElementHandle elementHandle = null;
-            if (args[i] instanceof WebElementSource) {
-                elementHandle = ((PlaywrightWebElement) (((WebElementSource) args[i]).getWebElement())).getLocator().elementHandle();
-            } else if (args[i] instanceof WrapsElement) {
-                elementHandle = ((PlaywrightWebElement) (((WrapsElement) args[i]).getWrappedElement())).getElementHandle();
-            } else if (args[i] instanceof WebElement) {
-                Locator locator = ((PlaywrightWebElement) args[i]).getLocator();
+            if (arg instanceof WebElementSource) {
+                elementHandle = ((PlaywrightWebElement) (((WebElementSource) arg).getWebElement())).getLocator().elementHandle();
+            } else if (arg instanceof WrapsElement) {
+                elementHandle = ((PlaywrightWebElement) (((WrapsElement) arg).getWrappedElement())).getElementHandle();
+            } else if (arg instanceof WebElement) {
+                Locator locator = ((PlaywrightWebElement) arg).getLocator();
                 elementHandle = locator.elementHandle();
-            } else if (args[i] instanceof Collection<?>) {
-                ArrayList<Object> arrayList = new ArrayList<>((Collection<?>) args[i]);
+            } else if (arg instanceof Collection<?>) {
+                ArrayList<Object> arrayList = new ArrayList<>((Collection<?>) arg);
                 if (!arrayList.isEmpty() && arrayList.get(0) instanceof WebElement) {
                     List<ElementHandle> list = arrayList.stream().map(e -> {
                         Locator locator = ((PlaywrightWebElement) e).getLocator();
@@ -774,12 +698,11 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
             if (elementHandle != null) {
                 result.add(elementHandle);
             } else {
-                if (args[i] instanceof Collection<?>) {
-                    ArrayList<Object> objects = new ArrayList<>();
-                    objects.addAll((Collection<?>) args[i]);
+                if (arg instanceof Collection<?>) {
+                    ArrayList<Object> objects = new ArrayList<>((Collection<?>) arg);
                     result.add(objects);
                 } else {
-                    result.add(args[i]);
+                    result.add(arg);
                 }
             }
         }
@@ -820,12 +743,4 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         return new PlaywrightWebElement(locator);
 
     }
-
-//    @Override
-//    public Pdf print(PrintOptions printOptions) throws WebDriverException {
-//        Page.PdfOptions pdfOptions = new Page.PdfOptions();
-//        //pdfOptions.
-//        printOptions.
-//        page.pdf()
-//    }
 }

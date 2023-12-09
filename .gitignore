@@ -2,4 +2,6 @@
 /target/
 /build/
 /.vscode/
-/downloads
+/downloads/
+.gradle/
+/video/

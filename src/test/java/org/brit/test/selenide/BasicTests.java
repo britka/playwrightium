@@ -2,21 +2,16 @@ package org.brit.test.selenide;
 
 import com.codeborne.selenide.*;
 import com.github.javafaker.Faker;
-import org.brit.additional.PlaywrightiumSelect;
 import org.brit.driver.PWDriverProvider;
-import org.brit.driver.PlaywrightiumDriver;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.ISelect;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import java.io.File;
-import java.time.Duration;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +40,7 @@ public class BasicTests {
 
         int checkBoxNum = faker.number().numberBetween(1, 4);
         ElementsCollection checkboxes = $$x("//input[@type='checkbox']");
-        checkboxes.stream().filter(element -> element.is(Condition.checked)).forEach(SelenideElement::click);
+        checkboxes.filter(Condition.checked).forEach(SelenideElement::click);
 
         SelenideElement checkBoxChecked = checkboxes.get(checkBoxNum - 1);
         SelenideElement checkBoxChecked1 = checkboxes.get(randomIntExcept(1, 4, checkBoxNum) - 1);
@@ -66,7 +61,7 @@ public class BasicTests {
         SelenideElement selectMulti = $(By.name("multipleselect[]"));
 
         selectMulti.selectOption(firstItem, secondItem);
-        List<String> selectMultyValues = selectMulti.getSelectedOptions().stream().map(SelenideElement::getValue).toList();
+        List<String> selectMultyValues = selectMulti.getSelectedOptions().attributes("value");
 
         SelenideElement select = $(By.name("dropdown"));
         select.selectOptionByValue("dd" + faker.number().numberBetween(1, 7));
@@ -93,7 +88,8 @@ public class BasicTests {
     }
 
 
-    @Test(dataProvider = "dataProvider")
+    @ParameterizedTest
+    @MethodSource("dataProvider")
     public void framesTest(String frameName, String frameText, int elementsCount) {
         open("https://testpages.eviltester.com/styled/frames/frames-test.html");
         switchTo().frame(frameName);
@@ -103,13 +99,13 @@ public class BasicTests {
         $$x("//frame").shouldHave(CollectionCondition.size(5));
     }
 
-    @DataProvider
-    private Object[][] dataProvider() {
-        return new Object[][]{
-                {"left", "Left", 30},
-                {"middle", "Middle", 40},
-                {"right", "Right", 50}
-        };
+
+    private static Stream<Arguments> dataProvider() {
+        return Stream.of(
+                Arguments.of("left", "Left", 30),
+                Arguments.of("middle", "Middle", 40),
+                Arguments.of("right", "Right", 50)
+        );
     }
 
     private String getWebElementTextById(String id) {

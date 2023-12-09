@@ -12,8 +12,6 @@ public class PWDRemoteDriverProvider implements WebDriverProvider {
     @Override
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
         PlaywrightWebdriverOptions chromeOptions = new PlaywrightWebdriverOptions();
-        chromeOptions.setCapability("headless", false);
-        chromeOptions.setCapability("browserName", "chrome");
 
 //        chromeOptions.setCapability("selenoid:options", Map.<String, Object>of(
 //                "enableVNC", true,
@@ -21,7 +19,7 @@ public class PWDRemoteDriverProvider implements WebDriverProvider {
 //        ));
 
 
-        PlaywrightiumDriver playwrightiumDriver = new PlaywrightiumDriver("http://moon.aerokube.local/wd/hub");
+        PlaywrightiumDriver playwrightiumDriver = new PlaywrightiumDriver("http://moon.aerokube.local");
         return playwrightiumDriver;
     }
 }
