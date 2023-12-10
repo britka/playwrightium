@@ -6,6 +6,8 @@ on:
     branches: [ main, master ]
 jobs:
   playwright:
+    env:
+      DISPLAY: :0
     name: 'Playwright Tests'
     runs-on: ubuntu-latest
     container:
@@ -16,8 +18,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Run headless test
-        uses: coactions/setup-xvfb@v1
+      - name: Setup xvfb Linux
+        if: runner.os == 'Linux'
+        run: |
+            sudo apt-get install -y xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
+            # start xvfb in the background
+            sudo /usr/bin/Xvfb $DISPLAY -screen 0 1280x1024x24 &
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Run build with Gradle Wrapper
