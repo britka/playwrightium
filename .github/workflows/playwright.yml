@@ -4,6 +4,10 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+permissions:
+  contents: read
+  actions: read
+  checks: write
 jobs:
   playwright:
     env:
@@ -28,3 +32,9 @@ jobs:
         uses: gradle/gradle-build-action@v2
       - name: Run build with Gradle Wrapper
         run: ./gradlew build
+      - uses: dorny/test-reporter@v1
+        with:
+            artifact: test-results            # artifact name
+            name: Junit report                  # Name of the check run which will be created
+            path: '**/TEST-*.xml'                     # Path to test results (inside artifact .zip)
+            reporter: java-junit
