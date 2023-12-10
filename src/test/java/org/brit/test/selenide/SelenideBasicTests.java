@@ -7,12 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 
 import java.io.File;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.codeborne.selenide.Condition.exactText;
+import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Selectors.byId;
 import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,6 +26,7 @@ public class SelenideBasicTests {
 
         Configuration.browser = PWDriverProvider.class.getName();
         Configuration.timeout = 10000;
+        Configuration.headless = false;
 
         final String url = "https://testpages.herokuapp.com/styled/basic-html-form-test.html";
 
@@ -87,13 +92,60 @@ public class SelenideBasicTests {
 
     }
 
+    /*
+    Unfortunately alerts are not working in Playwright as in Selenium.
+    You should at first describe all actions as you wish and after that
+    make actions that will invoke the alert.
+    After that you may get alert text.
+
+    But Selenide methods Selenide.confirm(), Selenide.dismiss() work as expected
+    but returned text value will be null
+
+    @see https://playwright.dev/java/docs/dialogs
+     */
+    @Test
+    public void alertsTest() {
+        Configuration.browser = PWDriverProvider.class.getName();
+        Configuration.timeout = 10000;
+
+        open("https://testpages.eviltester.com/styled/alerts/alert-test.html");
+
+        confirm();
+        $(By.id("alertexamples")).click();
+
+        Alert alert = webdriver().object().switchTo().alert();
+        alert.accept();
+
+        $(By.id("confirmexample")).click();
+        assertThat(alert.getText()).isEqualTo("I am a confirm alert");
+        $(byId("confirmexplanation")).shouldHave(exactText("You clicked OK, confirm returned true."));
+        $(byId("confirmreturn")).shouldHave(text("true"));
+
+        alert = webdriver().object().switchTo().alert();
+        alert.dismiss();
+        $(byId("confirmexample")).click();
+        assertThat(alert.getText()).isEqualTo("I am a confirm alert");
+        $(byId("confirmexplanation")).shouldHave(exactText("You clicked Cancel, confirm returned false."));
+        $(byId("confirmreturn")).shouldHave(text("false"));
+
+        String testString = "Test string";
+        alert = webdriver().object().switchTo().alert();
+        alert.sendKeys(testString);
+        alert.accept();
+        $(byId("promptexample")).click();
+        assertThat(alert.getText()).isEqualTo("I prompt you");
+        $(By.id("promptexplanation")).shouldHave(exactText("You clicked OK. 'prompt' returned  " + testString));
+        $(By.id("promptreturn")).shouldHave(text(testString));
+
+    }
+
 
     @ParameterizedTest
     @MethodSource("dataProvider")
     public void framesTest(String frameName, String frameText, int elementsCount) {
         open("https://testpages.eviltester.com/styled/frames/frames-test.html");
         switchTo().frame(frameName);
-        $(By.xpath("//h1")).shouldHave(Condition.exactText(frameText));
+        $(By.xpath("//h1")).shouldHave(exactText(frameText));
         $$(By.xpath("//ul/li")).shouldHave(CollectionCondition.size(elementsCount));
         switchTo().defaultContent();
         $$x("//frame").shouldHave(CollectionCondition.size(5));

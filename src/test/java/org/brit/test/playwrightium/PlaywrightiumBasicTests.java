@@ -9,10 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.ISelect;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -110,7 +107,7 @@ public class PlaywrightiumBasicTests {
                 .isEqualTo(selectValue);
         assertThat(getWebElementTextById("_valuefilename", driver))
                 .isEqualTo(file.getName());
-
+        ((JavascriptExecutor)driver).executeScript("return alert();");
     }
 
     @ParameterizedTest

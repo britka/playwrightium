@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-class PlaywrightuimAlert implements Alert {
+public class PlaywrightuimAlert implements Alert {
 
     private final PlaywrightiumDriver playwrightiumDriver;
     private AtomicReference<String> text = new AtomicReference<>();
