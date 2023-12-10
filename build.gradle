@@ -5,6 +5,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
 }
 
 repositories {
@@ -37,8 +38,8 @@ dependencies {
 }
 
 group = 'io.github.britka'
-version = '0.0.1-SNAPSHOT'
-description = 'playwrightium'
+version = '1.0.0'
+description = 'playwright-webdriver'
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 publishing {
@@ -57,8 +58,8 @@ javadoc {
     options.encoding = 'UTF-8'
 }
 
-test{
-    useJUnitPlatform(){
+test {
+    useJUnitPlatform() {
         filter {
             includeTestsMatching("org.brit.test.playwrightium.**")
             includeTestsMatching("org.brit.test.selenide.**")
