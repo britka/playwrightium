@@ -32,9 +32,8 @@ jobs:
         uses: gradle/gradle-build-action@v2
       - name: Run build with Gradle Wrapper
         run: ./gradlew build
-      - uses: dorny/test-reporter@v1
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure() # always run even if the previous step fails
         with:
-            artifact: test-results            # artifact name
-            name: Junit report                  # Name of the check run which will be created
-            path: '**/TEST-*.xml'                     # Path to test results (inside artifact .zip)
-            reporter: java-junit
+          report_paths: '**/build/test-results/test/TEST-*.xml'
