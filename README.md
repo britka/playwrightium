@@ -13,7 +13,19 @@ In general this is implementation of WebDriver interface using Playwright. Sound
 
 ## How to install
 ### Maven
-Add dependency to your **pom.xml**
+Add to your **pom.xml**
+
+Add repository
+```xml
+ <repositories>
+        <repository>
+            <id>maven1</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+    </repositories>
+
+```
+Add dependency
 ```xml
 <dependency>
     <groupId>io.github.britka</groupId>
