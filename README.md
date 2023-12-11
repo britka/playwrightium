@@ -24,7 +24,7 @@ Add dependency to your **pom.xml**
 
 ### Gradle
 ```groovy
-testImplementation("io.github.britka:playwrightium:LAST_VERSION")
+implementation 'io.github.britka:playwrightium:LAST_VERSION'
 ```
 
 This dependency encapsulates 
