@@ -6,7 +6,7 @@
     <groupId>io.github.britka</groupId>
     <artifactId>playwrightium</artifactId>
     <version>1.1.0</version>
-    <name>playwrightiumr</name>
+    <name>playwrightium</name>
     <description>Webdriver implementation using Playwright Java</description>
     <url>https://github.com/britka/playwright-webdriver</url>
     <licenses>
