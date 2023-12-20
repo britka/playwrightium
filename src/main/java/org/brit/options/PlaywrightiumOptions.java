@@ -2,11 +2,13 @@ package org.brit.options;
 
 import org.openqa.selenium.MutableCapabilities;
 
-public class PlaywrightWebdriverOptions extends MutableCapabilities {
+import java.nio.file.Path;
 
-    public PlaywrightWebdriverOptions() {
+public class PlaywrightiumOptions extends MutableCapabilities {
+
+    public PlaywrightiumOptions() {
         super();
-        setHeadless(true);
+        setHeadless(false);
         setBrowserName("chromium");
     }
 
@@ -20,5 +22,13 @@ public class PlaywrightWebdriverOptions extends MutableCapabilities {
 
     public void setBrowserName(String browserName) {
         setCapability("browserName", browserName);
+    }
+
+    public void setRecordVideo(Boolean recordVideo){
+        setCapability("recordVideo", recordVideo);
+    }
+
+    public void setRecordsFolder(Path recordsFolder){
+        setCapability("recordsFolder", recordsFolder);
     }
 }

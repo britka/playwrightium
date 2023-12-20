@@ -1,37 +1,45 @@
 package org.brit.test.playwrightium;
 
 import com.github.javafaker.Faker;
+import com.microsoft.playwright.options.AriaRole;
 import org.brit.additional.PlaywrightiumSelect;
 import org.brit.driver.PlaywrightiumDriver;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.brit.locators.ArialSearchOptions;
+import org.brit.locators.PlaywrightiumBy;
+import org.brit.options.PlaywrightiumOptions;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.ISelect;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PlaywrightiumBasicTests {
 
     static WebDriver driver;
 
-    @BeforeAll
-    public static void beforeClass() {
-        driver = new PlaywrightiumDriver();
+    @BeforeEach
+    public void beforeClass() {
+        PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
+        playwrightiumOptions.setRecordsFolder(Paths.get("videos"));
+        driver = new PlaywrightiumDriver(playwrightiumOptions);
     }
 
-    @AfterAll
-    public static void afterClass() {
+    @AfterEach
+    public void afterClass() {
         if (driver != null) {
             driver.quit();
         }
@@ -39,7 +47,7 @@ public class PlaywrightiumBasicTests {
 
     @Test
     public void basicFunctionalTests() {
-        final String url = "https://testpages.herokuapp.com/styled/basic-html-form-test.html";
+        final String url = "https://testpages.eviltester.com/styled/basic-html-form-test.html";
 
         Faker faker = new Faker();
         driver.get(url);
@@ -107,7 +115,7 @@ public class PlaywrightiumBasicTests {
                 .isEqualTo(selectValue);
         assertThat(getWebElementTextById("_valuefilename", driver))
                 .isEqualTo(file.getName());
-        ((JavascriptExecutor)driver).executeScript("return alert();");
+        ((JavascriptExecutor) driver).executeScript("return alert();");
     }
 
     @ParameterizedTest
@@ -163,6 +171,79 @@ public class PlaywrightiumBasicTests {
         driver.findElement(By.id("promptexample")).click();
         assertThat(alert.getText()).isEqualTo("I prompt you");
         assertThat(driver.findElement(By.id("promptexplanation")).getText()).isEqualTo("You clicked Cancel. 'prompt' returned null");
+    }
+
+    @Test
+    public void dragAndDropTest() {
+        driver.get("https://testpages.eviltester.com/styled/drag-drop-javascript.html");
+        assertThat(driver.findElement(By.id("droppable1")).getText().trim()).contains("Drop here");
+        new Actions(driver)
+                .dragAndDrop(driver.findElement(By.id("draggable1")), driver.findElement(By.id("droppable1")))
+                .pause(Duration.ofSeconds(2))
+                .build()
+                .perform();
+        assertThat(driver.findElement(By.id("droppable1")).getText().trim()).contains("Dropped!");
+    }
+
+    @Test
+    public void moveToTest() {
+        driver.get("https://testpages.eviltester.com/styled/csspseudo/css-hover.html");
+        Actions actions = new Actions(driver);
+        actions
+                .moveToElement(driver.findElement(By.id("hoverpara")))
+                .build()
+                .perform();
+        assertThat(driver.findElement(By.id("hoverparaeffect")).isDisplayed()).isTrue();
+        assertThat(driver.findElement(By.id("hoverparaeffect")).getText())
+                .isEqualTo("You can see this paragraph now that you hovered on the above 'button'.");
+
+        actions
+                .moveToElement(driver.findElement(By.id("hoverdiv")))
+                .perform();
+        driver.findElement(By.id("hoverlink")).click();
+        WebElement aReturn = driver.findElement(PlaywrightiumBy.byRole(AriaRole.LINK,
+                new ArialSearchOptions().setName(Pattern.compile("Return"))));
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.visibilityOf(aReturn));
+    }
+
+    @Test
+    public void actionTest() {
+        driver.get("https://testpages.herokuapp.com/styled/basic-html-form-test.html");
+        String testMessage = "Test message 1";
+        String testMessage2 = "Test 2 message";
+
+        WebElement comments = driver.findElement(By.name("comments"));
+
+        Actions actions = new Actions(driver);
+
+        Keys cmdCtrl = Platform.getCurrent().is(Platform.MAC) ? Keys.COMMAND : Keys.CONTROL;
+
+        comments.clear();
+        new Actions(driver)
+                .sendKeys(comments, "Selenium!")
+                .sendKeys(Keys.ARROW_LEFT)
+                .keyDown(Keys.SHIFT)
+                .sendKeys(Keys.ARROW_UP)
+                .keyUp(Keys.SHIFT)
+                .keyDown(cmdCtrl)
+                .sendKeys("xvv")
+                .keyUp(cmdCtrl)
+                .perform();
+        assertThat(comments.getAttribute("value")).isEqualTo("SeleniumSelenium!");
+        WebElement username = driver.findElement(By.name("username"));
+        actions
+                .keyDown(cmdCtrl)
+                .sendKeys("ac")
+                .keyUp(cmdCtrl)
+                .keyDown(Keys.DELETE)
+                .keyUp(Keys.DELETE)
+                .keyDown(username, cmdCtrl)
+                .sendKeys("v")
+                .keyUp(cmdCtrl)
+                .perform();
+
+        assertThat(username.getAttribute("value")).isEqualTo("SeleniumSelenium!");
     }
 
 
