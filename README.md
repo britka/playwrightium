@@ -19,7 +19,7 @@ Add repository
 ```xml
  <repositories>
         <repository>
-            <id>maven1</id>
+            <id>maven1Repo</id>
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
     </repositories>
@@ -85,6 +85,27 @@ WebElement cssElement = driver.findElement(By.xpath("//label[text()='Some text']
 List<WebElement> elementList = driver.findElements(By.name("any name"));
 ```
 
+Also you can use Playwright locators
+See [documentation](https://playwright.dev/java/docs/locators)
+
+For this use `PlaywrightiumBy` class:
+* PlaywrightiumBy.byRole
+* PlaywrightiumBy.byAltTextbyLabel
+* PlaywrightiumBy.byPlaceholder
+* PlaywrightiumBy.byTestId
+* PlaywrightiumBy.byText
+* PlaywrightiumBy.byTitle
+
+For example:
+
+```java
+import org.openqa.selenium.WebElement;
+
+WebElement submitButton =
+        driver.findElement(PlaywrightiumBy.byRole(AriaRole.BUTTON, AriaRoleOptions.builder().setName("submit").build()));
+WebElement driver.findElement(PlaywrightiumBy.byLabel("LabeText", true));
+```
+
 * Work with WebElements
 For example
 ```java
@@ -140,6 +161,31 @@ new Actions(driver).moveToElement(driver.findElement(By.id("someId"))).build().p
 ((JavascriptExecutor)driver).executeScript("return alert();");
 ```
 
+* Record video
+Initialize Playwrightium driver using `PlaywrightiumOptions` class
+```java
+PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
+playwrightiumOptions.setRecordsFolder(Paths.get("videos"));
+driver = new PlaywrightiumDriver(playwrightiumOptions);
+```
+> [!IMPORTANT]
+> This will create folder 'videos' in the root of your project
+> If you initialize driver in BeforeAll(or similar) section it will record all tests as 1 video file
+> To record video of separate tests you should initialize browser before each test.
+
+How this feature works.
+
+For `chromium` based browsers Playwright is trying to use CDP protocol to screencast browser context and collect screenshots
+and after that it uses `ffmpeg` to create video from images.
+
+* See [CDP protocol. Page.](https://chromedevtools.github.io/devtools-protocol/tot/Page/)
+  * [Page.startScreencast](https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-startScreencast)
+  * [Page.stopScreencast](https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-stopScreencast)
+  * [Page.screencastFrameAck](https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-screencastFrameAck)
+  * [Page.screencastFrame](https://chromedevtools.github.io/devtools-protocol/tot/Page/#event-screencastFrame)
+* See [ffmpeg](https://ffmpeg.org/)
+  * [ffmpeg FAQ about `image2pipe` approach](https://ffmpeg.org/faq.html#How-do-I-encode-single-pictures-into-movies_003f)
+  
 ## How to use it with Selenide
 To use it with Selenide you should implement `WebDriverProvider` interface.
 For example:

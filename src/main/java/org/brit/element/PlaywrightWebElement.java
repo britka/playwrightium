@@ -1,7 +1,9 @@
 package org.brit.element;
 
 import com.microsoft.playwright.*;
+import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.BoundingBox;
+import org.brit.locators.ArialSearchOptions;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebElement;
 
@@ -11,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class PlaywrightWebElement extends RemoteWebElement {
@@ -124,8 +127,66 @@ public class PlaywrightWebElement extends RemoteWebElement {
             case "partial link text", "link text" ->
                     locator.locator("a", new Locator.LocatorOptions().setHasText(value));
             case "id" -> locator.locator("#%s".formatted(value));
-            default -> null;
+            default -> {
+                List<Object> list = (List<Object>) ((By.Remotable) by).getRemoteParameters().value();
+                yield switch (using) {
+                    case "getByRole" -> {
+                        AriaRole role = (AriaRole) list.get(0);
+                        ArialSearchOptions getByRoleOptions = ((ArialSearchOptions) list.get(1));
+                        yield locator.getByRole(role, convertOption(getByRoleOptions));
+                    }
+                    case "getByTestId" -> locator.getByTestId((String) list.get(0));
+                    case "getByAltText" -> locator.getByAltText((String) list.get(0),
+                            new Locator.GetByAltTextOptions().setExact((Boolean) list.get(1)));
+                    case "getByLabel" -> locator.getByLabel((String) list.get(0),
+                            new Locator.GetByLabelOptions().setExact((Boolean) list.get(1)));
+                    case "getByPlaceholder" -> locator.getByPlaceholder((String) list.get(0),
+                            new Locator.GetByPlaceholderOptions().setExact((Boolean) list.get(1)));
+                    case "getByText" -> locator.getByText((String) list.get(0),
+                            new Locator.GetByTextOptions().setExact((Boolean) list.get(1)));
+                    case "getByTitle" -> locator.getByTitle((String) list.get(0),
+                            new Locator.GetByTitleOptions().setExact((Boolean) list.get(1)));
+                    default -> null;
+                };
+            }
         };
+    }
+
+    private Locator.GetByRoleOptions convertOption(ArialSearchOptions arialSearchOptions) {
+        Object name = arialSearchOptions.getName();
+        Locator.GetByRoleOptions getByRoleOptions = new Locator.GetByRoleOptions();
+        if (arialSearchOptions.checked != null){
+            getByRoleOptions.setChecked(arialSearchOptions.getChecked());
+        }
+        if (arialSearchOptions.exact != null){
+            getByRoleOptions.setExact(arialSearchOptions.getExact());
+        }
+        if (arialSearchOptions.disabled != null){
+            getByRoleOptions.setDisabled(arialSearchOptions.getDisabled());
+        }
+        if (arialSearchOptions.expanded != null){
+            getByRoleOptions.setExpanded(arialSearchOptions.getExpanded());
+        }
+        if (arialSearchOptions.pressed != null){
+            getByRoleOptions.setPressed(arialSearchOptions.getPressed());
+        }
+        if (arialSearchOptions.selected != null){
+            getByRoleOptions.setSelected(arialSearchOptions.getSelected());
+        }
+        if (arialSearchOptions.includeHidden != null){
+            getByRoleOptions.setIncludeHidden(arialSearchOptions.getIncludeHidden());
+        }
+        if (arialSearchOptions.level != null){
+            getByRoleOptions.setLevel(arialSearchOptions.getLevel());
+        }
+        if (arialSearchOptions.name != null){
+            if (name instanceof Pattern) {
+                getByRoleOptions.setName((Pattern) name);
+            } else if (name instanceof String) {
+                getByRoleOptions.setName((String) name);
+            }
+        }
+        return getByRoleOptions;
     }
 
     @Override

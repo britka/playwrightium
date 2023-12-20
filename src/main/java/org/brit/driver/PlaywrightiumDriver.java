@@ -2,29 +2,41 @@ package org.brit.driver;
 
 import com.codeborne.selenide.impl.WebElementSource;
 import com.microsoft.playwright.*;
+import com.microsoft.playwright.Frame;
+import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.MouseButton;
 import com.microsoft.playwright.options.ViewportSize;
+import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.commons.text.CaseUtils;
 import org.brit.element.PlaywrightWebElement;
-import org.brit.options.PlaywrightWebdriverOptions;
+import org.brit.locators.ArialSearchOptions;
+import org.brit.options.PlaywrightiumOptions;
 import org.openqa.selenium.*;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.logging.Logs;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
     private Playwright playwright;
     private BrowserContext browserContext;
+    @Getter
     protected Page page;
 
     private Page activePage;
@@ -32,28 +44,28 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     private Frame mainFrameCopy = null;
 
 
+    @SneakyThrows
     public PlaywrightiumDriver() {
-        playwright = Playwright.create();
-        browserContext = getBrowserType("chromium")
-                .launch(new BrowserType.LaunchOptions().setHeadless(true).setDownloadsPath(Paths.get("downloads")))
-                .newContext(new Browser.NewContextOptions().setViewportSize(null).setAcceptDownloads(true));
-        page = browserContext.newPage();
+        this(new PlaywrightiumOptions());
     }
 
-    public PlaywrightiumDriver(PlaywrightWebdriverOptions options) {
+    public PlaywrightiumDriver(PlaywrightiumOptions options) {
         playwright = Playwright.create();
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
         Boolean headless = (Boolean) options.getCapability("headless");
         launchOptions.setHeadless(headless).setDownloadsPath(Paths.get("downloads"));
         String browserType = (String) options.getCapability("browserName");
-        //    .setChannel("chrome");
+        Path recordVideoPath = (Path) options.getCapability("recordsFolder");
 
+        Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
+        if (recordVideoPath != null){
+            newContextOptions.setRecordVideoDir(recordVideoPath);
+        }
 
         browserContext = getBrowserType(browserType)
                 .launch(launchOptions)
-                .newContext(new Browser.NewContextOptions().setAcceptDownloads(true));
+                .newContext(newContextOptions);
         page = browserContext.newPage();
-        // page.setViewportSize(1024, 768);
     }
 
 
@@ -120,17 +132,95 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     private Locator getLocatorFromBy(By by) {
         String using = ((By.Remotable) by).getRemoteParameters().using();
         String value = ((By.Remotable) by).getRemoteParameters().value().toString();
-        return switch (using) {
-            case "css selector" -> page.locator(value);
-            case "class name" -> page.locator("xpath=//*[@class='%s']".formatted(value));
-            case "xpath" -> page.locator("xpath=" + value);
-            case "tag name" -> page.locator("xpath=//" + value);
-            case "name" -> page.locator("[name='%s']".formatted(value));
-            case "partial link text" -> page.locator("xpath=//a[contains(.,'%s')]".formatted(value));
-            case "link text" -> page.locator("xpath=//a[text()='%s']".formatted(value));
-            case "id" -> page.locator("#%s".formatted(value));
-            default -> null;
-        };
+        switch (using) {
+            case "css selector" -> {
+                return page.locator(value);
+            }
+            case "class name" -> {
+                return page.locator("xpath=//*[@class='%s']".formatted(value));
+            }
+            case "xpath" -> {
+                return page.locator("xpath=" + value);
+            }
+            case "tag name" -> {
+                return page.locator("xpath=//" + value);
+            }
+            case "name" -> {
+                return page.locator("[name='%s']".formatted(value));
+            }
+            case "partial link text" -> {
+                return page.locator("xpath=//a[contains(.,'%s')]".formatted(value));
+            }
+            case "link text" -> {
+                return page.locator("xpath=//a[text()='%s']".formatted(value));
+            }
+            case "id" -> {
+                return page.locator("#%s".formatted(value));
+            }
+            default -> {
+                List<Object> list = (List<Object>) ((By.Remotable) by).getRemoteParameters().value();
+                return switch (using) {
+                    case "getByRole" -> {
+                        AriaRole role = (AriaRole) list.get(0);
+                        ArialSearchOptions arialSearchOptions = ((ArialSearchOptions) list.get(1));
+                        yield page.getByRole(role, convertOption(arialSearchOptions));
+                    }
+                    case "getByTestId" -> page.getByTestId((String) list.get(0));
+                    case "getByAltText" -> page.getByAltText((String) list.get(0),
+                            new Page.GetByAltTextOptions().setExact((Boolean) list.get(1)));
+                    case "getByLabel" -> page.getByLabel((String) list.get(0),
+                            new Page.GetByLabelOptions().setExact((Boolean) list.get(1)));
+                    case "getByPlaceholder" -> page.getByPlaceholder((String) list.get(0),
+                            new Page.GetByPlaceholderOptions().setExact((Boolean) list.get(1)));
+                    case "getByText" -> page.getByText((String) list.get(0),
+                            new Page.GetByTextOptions().setExact((Boolean) list.get(1)));
+                    case "getByTitle" -> page.getByTitle((String) list.get(0),
+                            new Page.GetByTitleOptions().setExact((Boolean) list.get(1)));
+                    default -> null;
+                };
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Page.GetByRoleOptions getByRoleOptions = new Page.GetByRoleOptions();
+    }
+
+    private Page.GetByRoleOptions convertOption(ArialSearchOptions arialSearchOptions) {
+        Object name = arialSearchOptions.getName();
+        Page.GetByRoleOptions getByRoleOptions = new Page.GetByRoleOptions();
+        if (arialSearchOptions.checked != null){
+            getByRoleOptions.setChecked(arialSearchOptions.getChecked());
+        }
+        if (arialSearchOptions.exact != null){
+            getByRoleOptions.setExact(arialSearchOptions.getExact());
+        }
+        if (arialSearchOptions.disabled != null){
+            getByRoleOptions.setDisabled(arialSearchOptions.getDisabled());
+        }
+        if (arialSearchOptions.expanded != null){
+            getByRoleOptions.setExpanded(arialSearchOptions.getExpanded());
+        }
+        if (arialSearchOptions.pressed != null){
+            getByRoleOptions.setPressed(arialSearchOptions.getPressed());
+        }
+        if (arialSearchOptions.selected != null){
+            getByRoleOptions.setSelected(arialSearchOptions.getSelected());
+        }
+        if (arialSearchOptions.includeHidden != null){
+            getByRoleOptions.setIncludeHidden(arialSearchOptions.getIncludeHidden());
+        }
+        if (arialSearchOptions.level != null){
+            getByRoleOptions.setLevel(arialSearchOptions.getLevel());
+        }
+        if (arialSearchOptions.name != null){
+            if (name instanceof Pattern) {
+                getByRoleOptions.setName((Pattern) name);
+            } else if (name instanceof String) {
+                getByRoleOptions.setName((String) name);
+            }
+        }
+        return getByRoleOptions;
     }
 
     @Override
@@ -145,6 +235,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public void quit() {
+        page.context().close();
         playwright.close();
     }
 
@@ -406,7 +497,6 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public WebDriver newWindow(WindowType typeHint) {
-
             return null;
         }
 
@@ -605,13 +695,19 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
                     break;
                 }
                 case "keyDown": {
-
                     String value = actionToApply.get("value").toString();
                     char ch = value.toCharArray()[0];
                     String keyToPress = "";
                     if (Keys.getKeyFromUnicode(ch) != null) {
                         keyToPress = CaseUtils
                                 .toCamelCase(Keys.getKeyFromUnicode(ch).name(), true, ' ');
+                        keyToPress = switch (keyToPress) {
+                            case "Left" -> "ArrowLeft";
+                            case "Up" -> "ArrowUp";
+                            case "Down" -> "ArrowDown";
+                            case "Right" -> "ArrowRight";
+                            default -> keyToPress;
+                        };
                         page.keyboard().down(keyToPress);
                     } else {
                         keyToPress = Character.toString(ch);
@@ -627,6 +723,13 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
                     if (Keys.getKeyFromUnicode(ch) != null) {
                         keyToPress = CaseUtils
                                 .toCamelCase(Keys.getKeyFromUnicode(ch).name(), true, ' ');
+                        keyToPress = switch (keyToPress) {
+                            case "Left" -> "ArrowLeft";
+                            case "Up" -> "ArrowUp";
+                            case "Down" -> "ArrowDown";
+                            case "Right" -> "ArrowRight";
+                            default -> keyToPress;
+                        };
                     } else {
                         keyToPress = Character.toString(ch);
                     }
@@ -743,4 +846,5 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         return new PlaywrightWebElement(locator);
 
     }
+
 }

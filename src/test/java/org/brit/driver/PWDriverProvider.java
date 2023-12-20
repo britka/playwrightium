@@ -1,7 +1,7 @@
 package org.brit.driver;
 
 import com.codeborne.selenide.WebDriverProvider;
-import org.brit.options.PlaywrightWebdriverOptions;
+import org.brit.options.PlaywrightiumOptions;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 
@@ -12,7 +12,7 @@ public class PWDriverProvider implements WebDriverProvider {
     @Nonnull
     @Override
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
-        PlaywrightWebdriverOptions chromeOptions = new PlaywrightWebdriverOptions();
+        PlaywrightiumOptions chromeOptions = new PlaywrightiumOptions();
         chromeOptions.setHeadless(false);
         chromeOptions.merge(capabilities);
         return new PlaywrightiumDriver(chromeOptions);
