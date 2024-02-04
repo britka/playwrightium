@@ -15,16 +15,6 @@ In general this is implementation of WebDriver interface using Playwright. Sound
 ### Maven
 Add to your **pom.xml**
 
-Add repository
-```xml
- <repositories>
-        <repository>
-            <id>maven1Repo</id>
-            <url>https://repo1.maven.org/maven2/</url>
-        </repository>
-    </repositories>
-
-```
 Add dependency
 ```xml
 <dependency>
