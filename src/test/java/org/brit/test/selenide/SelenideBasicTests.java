@@ -1,14 +1,17 @@
 package org.brit.test.selenide;
 
 import com.codeborne.selenide.*;
+import com.codeborne.selenide.junit5.TextReportExtension;
 import com.github.javafaker.Faker;
 import org.brit.driver.PWDriverProvider;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.interactions.WheelInput;
 
 import java.io.File;
 import java.util.List;
@@ -20,6 +23,7 @@ import static com.codeborne.selenide.Selectors.byId;
 import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith({TextReportExtension.class})
 public class SelenideBasicTests {
     @Test
     public void basicFunctionalTests() {
@@ -31,6 +35,7 @@ public class SelenideBasicTests {
         final String url = "https://testpages.herokuapp.com/styled/basic-html-form-test.html";
 
         open(url);
+
 
         Faker faker = new Faker();
 

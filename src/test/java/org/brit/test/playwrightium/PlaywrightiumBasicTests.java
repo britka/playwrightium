@@ -1,8 +1,10 @@
 package org.brit.test.playwrightium;
 
+import com.codeborne.selenide.Configuration;
 import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
 import org.brit.additional.PlaywrightiumSelect;
+import org.brit.driver.PWDriverProvider;
 import org.brit.driver.PlaywrightiumDriver;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
@@ -24,8 +26,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.as;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.sleep;
+import static org.assertj.core.api.Assertions.*;
 
 public class PlaywrightiumBasicTests {
 
@@ -33,9 +36,9 @@ public class PlaywrightiumBasicTests {
 
     @BeforeEach
     public void beforeClass() {
-        PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
-        playwrightiumOptions.setRecordsFolder(Paths.get("videos"));
-        driver = new PlaywrightiumDriver(playwrightiumOptions);
+      //  PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
+       // playwrightiumOptions.setRecordsFolder(Paths.get("videos"));
+        driver = new PlaywrightiumDriver();
     }
 
     @AfterEach
@@ -244,6 +247,23 @@ public class PlaywrightiumBasicTests {
                 .perform();
 
         assertThat(username.getAttribute("value")).isEqualTo("SeleniumSelenium!");
+    }
+
+    @Test
+    public void scrollTest() {
+
+        driver.get("https://the-internet.herokuapp.com/large");
+        System.out.println(driver.findElement(By.id("large-table")).isDisplayed());
+//        actions()
+//                .scrollToElement($("#large-table"))
+//                .build()
+//                .perform();
+
+//        actions()
+//                .scrollByAmount()
+//                .build()
+//                .perform();
+        sleep(3000);
     }
 
 

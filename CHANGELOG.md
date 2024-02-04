@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1 (release 05.01.24)
+* rebuild javaScript executor. Now if script result is object it returns as JSON
+* add implementation "scroll" action. 
+* add dependbot.xml
+* update tests
+
 ## 1.1.0 (released 20.12.23)
 * add support of Playwright locators:
   * getByRole

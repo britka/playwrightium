@@ -58,7 +58,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         Path recordVideoPath = (Path) options.getCapability("recordsFolder");
 
         Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
-        if (recordVideoPath != null){
+        if (recordVideoPath != null) {
             newContextOptions.setRecordVideoDir(recordVideoPath);
         }
 
@@ -189,31 +189,31 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     private Page.GetByRoleOptions convertOption(ArialSearchOptions arialSearchOptions) {
         Object name = arialSearchOptions.getName();
         Page.GetByRoleOptions getByRoleOptions = new Page.GetByRoleOptions();
-        if (arialSearchOptions.checked != null){
+        if (arialSearchOptions.checked != null) {
             getByRoleOptions.setChecked(arialSearchOptions.getChecked());
         }
-        if (arialSearchOptions.exact != null){
+        if (arialSearchOptions.exact != null) {
             getByRoleOptions.setExact(arialSearchOptions.getExact());
         }
-        if (arialSearchOptions.disabled != null){
+        if (arialSearchOptions.disabled != null) {
             getByRoleOptions.setDisabled(arialSearchOptions.getDisabled());
         }
-        if (arialSearchOptions.expanded != null){
+        if (arialSearchOptions.expanded != null) {
             getByRoleOptions.setExpanded(arialSearchOptions.getExpanded());
         }
-        if (arialSearchOptions.pressed != null){
+        if (arialSearchOptions.pressed != null) {
             getByRoleOptions.setPressed(arialSearchOptions.getPressed());
         }
-        if (arialSearchOptions.selected != null){
+        if (arialSearchOptions.selected != null) {
             getByRoleOptions.setSelected(arialSearchOptions.getSelected());
         }
-        if (arialSearchOptions.includeHidden != null){
+        if (arialSearchOptions.includeHidden != null) {
             getByRoleOptions.setIncludeHidden(arialSearchOptions.getIncludeHidden());
         }
-        if (arialSearchOptions.level != null){
+        if (arialSearchOptions.level != null) {
             getByRoleOptions.setLevel(arialSearchOptions.getLevel());
         }
-        if (arialSearchOptions.name != null){
+        if (arialSearchOptions.name != null) {
             if (name instanceof Pattern) {
                 getByRoleOptions.setName((Pattern) name);
             } else if (name instanceof String) {
@@ -736,8 +736,22 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
                     page.keyboard().up(keyToPress);
                     break;
                 }
-                //TODO add scroll action
                 case "scroll": {
+                    int x = (int) actionToApply.get("x");
+                    int y = (int) actionToApply.get("y");
+                    int deltaX = (int) actionToApply.get("deltaX");
+                    int deltaY = (int) actionToApply.get("deltaY");
+                    Object origin = actionToApply.get("origin");
+                    if (origin instanceof PlaywrightWebElement element) {
+                        page.mouse().wheel(element.getLocation().getX(), element.getLocation().getY());
+                        page.mouse().wheel(x, y);
+                        page.mouse().wheel(deltaX, deltaY);
+                        break;
+                    }
+                    if (origin.equals("viewport")) {
+                        page.mouse().wheel(x, y);
+                        page.mouse().wheel(deltaX, deltaY);
+                    }
                     break;
                 }
 
@@ -747,9 +761,10 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public Object executeScript(String script, Object... args) {
+        script = script.trim().startsWith("return") ? script.replaceFirst("return", "") : script;
         if (args.length > 0) {
             var arguments = transformArguments(args);
-            JSHandle jsHandle = page.evaluateHandle("(arguments) => " + script.replaceFirst("return", ""), arguments);
+            JSHandle jsHandle = page.evaluateHandle("(arguments) => " + script, arguments);
             if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof HTMLCollection").toString())) {
                 int length = (int) page.evaluate("node => node.length", jsHandle);
                 List<PlaywrightWebElement> list = new ArrayList<>();
@@ -759,8 +774,6 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
                 return list;
             } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof HTMLElement").toString())) {
                 return getPlaywrightElement(jsHandle.asElement());
-            } else if (Boolean.parseBoolean(jsHandle.evaluate("node => typeof node === 'string' || node instanceof String").toString())) {
-                return jsHandle.toString();
             } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof Array").toString())) {
                 int length = (int) page.evaluate("node => node.length", jsHandle);
                 List<String> list = new ArrayList<>();
@@ -769,11 +782,15 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
                     list.add(evaluate != null ? evaluate.toString() : null);
                 }
                 return list;
+            } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof Object").toString())) {
+                return jsHandle.jsonValue();
+            } else {
+                return jsHandle.toString();
             }
         } else {
-            return page.evaluate(script.replaceFirst("return", ""));
+            return page.evaluate(script);
         }
-        return Map.of();
+        // return Map.of();
     }
 
     private List<Object> transformArguments(Object... args) {
