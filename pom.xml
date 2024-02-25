@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.britka</groupId>
     <artifactId>playwrightium</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
     <name>playwrightium</name>
     <description>Webdriver implementation using Playwright Java</description>
     <url>https://github.com/britka/playwright-webdriver</url>
@@ -33,6 +33,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <playwright.version>1.41.2</playwright.version>
+        <selenide.version>7.1.0</selenide.version>
     </properties>
 
     <distributionManagement>
@@ -46,12 +48,32 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>maven1</id>
+            <url>https://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.microsoft.playwright</groupId>
             <artifactId>playwright</artifactId>
-            <version>1.41.2</version>
+            <version>${playwright.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.opencv/opencv -->
+        <dependency>
+            <groupId>org.openpnp</groupId>
+            <artifactId>opencv</artifactId>
+            <version>[4.3.0,)</version>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -65,7 +87,7 @@
         <dependency>
             <groupId>com.codeborne</groupId>
             <artifactId>selenide</artifactId>
-            <version>7.2.0</version>
+            <version>${selenide.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

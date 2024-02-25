@@ -16,6 +16,11 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * @author Serhii Bryt
+ * WebElement implementation
+ * @see org.openqa.selenium.WebElement
+ */
 public class PlaywrightWebElement extends RemoteWebElement {
 
     Locator locator;

@@ -11,6 +11,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @author Serhii Bryt
+ *
+ * This is implementation of ISelect interface
+ * It is made to act like in Webdriver
+ * In Selenide it is not used.
+ * @see org.openqa.selenium.support.ui.ISelect
+ */
+
 public class PlaywrightiumSelect implements ISelect {
 
     Locator element;
