@@ -3,7 +3,12 @@ package org.brit.test.selenide;
 import com.codeborne.selenide.*;
 import com.codeborne.selenide.junit5.TextReportExtension;
 import com.github.javafaker.Faker;
+import com.microsoft.playwright.options.AriaRole;
+import org.apache.commons.io.FileUtils;
+import org.brit.driver.PWDRemoteDriverProvider;
 import org.brit.driver.PWDriverProvider;
+import org.brit.locators.ArialSearchOptions;
+import org.brit.locators.PlaywrightiumBy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +19,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.interactions.WheelInput;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -142,6 +149,43 @@ public class SelenideBasicTests {
         $(By.id("promptexplanation")).shouldHave(exactText("You clicked OK. 'prompt' returned  " + testString));
         $(By.id("promptreturn")).shouldHave(text(testString));
 
+    }
+
+    @Test
+    public void downloadTest() throws IOException {
+        Configuration.browser = PWDRemoteDriverProvider.class.getName();
+        //Configuration.remote = "http://localhost:4444/wd/hub";
+        Faker faker = new Faker();
+        File test = File.createTempFile("test", null);
+        String paragraph = faker.lorem().paragraph(6);
+        FileUtils.writeStringToFile(test, paragraph, Charset.defaultCharset());
+        open("https://the-internet.herokuapp.com/upload");
+        $("#file-upload").uploadFile(test);
+        $(PlaywrightiumBy.byRole(AriaRole.BUTTON, new ArialSearchOptions().setName("Upload"))).click();
+        $("#uploaded-files").shouldHave(text(test.getName()));
+        open("https://the-internet.herokuapp.com/download");
+        File download = $(By.linkText(test.getName())).download();
+        assertThat(test).hasSameTextualContentAs(download);
+    }
+
+    /**
+     * This test is only for chromium
+     * @throws IOException
+     */
+    @Test
+    public void downloadSelenoidTest() throws IOException {
+        Configuration.browser = PWDRemoteDriverProvider.class.getName();
+        Faker faker = new Faker();
+        File test = File.createTempFile("test", null);
+        String paragraph = faker.lorem().paragraph(6);
+        FileUtils.writeStringToFile(test, paragraph, Charset.defaultCharset());
+        open("https://the-internet.herokuapp.com/upload");
+        $("#file-upload").uploadFile(test);
+        $(PlaywrightiumBy.byRole(AriaRole.BUTTON, new ArialSearchOptions().setName("Upload"))).click();
+        $("#uploaded-files").shouldHave(text(test.getName()));
+        open("https://the-internet.herokuapp.com/download");
+        File download = $(By.linkText(test.getName())).download();
+        assertThat(test).hasSameTextualContentAs(download);
     }
 
 

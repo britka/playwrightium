@@ -11,6 +11,11 @@ import org.openqa.selenium.WebElement;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * @author Serhii Bryt
+ * This is implementation to use Playwright getBy... methods.
+ * @see <a href='https://playwright.dev/java/docs/locators'>Playwright. getBy... locators search</a>
+ */
 @Getter
 public abstract class PlaywrightiumBy extends By implements By.Remotable {
     private final By.Remotable.Parameters remoteParameters;

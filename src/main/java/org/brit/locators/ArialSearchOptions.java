@@ -5,6 +5,12 @@ import lombok.experimental.Accessors;
 
 import java.util.regex.Pattern;
 
+/**
+ * @author Serhii Bryt
+ *
+ * This is options to use with searching with Playwright getByRole method
+ * @see <a href='https://playwright.dev/java/docs/locators#locate-by-role'>Playwright. GetByRole</a>
+ */
 @Data
 @Accessors(chain = true)
 public class ArialSearchOptions {

@@ -16,6 +16,11 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * @author Serhii Bryt
+ *
+ * This is implementation for file download to be compartible with Selenide
+ */
 public class DownloadFileToFolderPW extends DownloadFileToFolder {
 
     public DownloadFileToFolderPW() {
@@ -35,7 +40,7 @@ public class DownloadFileToFolderPW extends DownloadFileToFolder {
     public File myDownload(WebElementSource anyClickableElement, PlaywrightWebElement clickable, long timeout, long incrementTimeout, FileFilter fileFilter, DownloadAction action) throws FileNotFoundException {
         Page page = clickable.getLocator().page();
         Download download = page.waitForDownload(clickable::click);
-        Path fileSaved = Paths.get(Configuration.downloadsFolder + "/tempDowloaded.tmp");
+        Path fileSaved = Paths.get(Configuration.downloadsFolder, download.suggestedFilename());
         download.saveAs(fileSaved);
         return super.archiveFile(anyClickableElement.driver(), fileSaved.toFile());
     }
