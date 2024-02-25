@@ -17,6 +17,7 @@ public class PlaywrightiumOptions extends MutableCapabilities {
     public PlaywrightiumOptions() {
         super();
         setHeadless(false);
+        setRecordVideo(false);
         setBrowserName("chromium");
     }
 
