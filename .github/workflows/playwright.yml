@@ -36,6 +36,8 @@ jobs:
   playwrightium_selenoid:
     name: 'Playwrightium remote tests'
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright/java:v1.40.0-jammy
     steps:
       - name: Start selenoid
         uses: Xotabu4/selenoid-github-action@v2
