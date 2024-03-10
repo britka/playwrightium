@@ -31,6 +31,7 @@ jobs:
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
         with:
+          check_name: 'Playwrightium local tests results'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
           include_passed: true
   playwrightium_selenoid:
@@ -54,5 +55,6 @@ jobs:
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
         with:
+          check_name: 'Playwrightium remote tests results'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
           include_passed: true
