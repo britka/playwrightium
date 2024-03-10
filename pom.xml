@@ -34,7 +34,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <playwright.version>1.41.2</playwright.version>
-        <selenide.version>7.1.0</selenide.version>
+        <selenide.version>7.2.0</selenide.version>
     </properties>
 
     <distributionManagement>
@@ -86,7 +86,7 @@
         </dependency>
         <dependency>
             <groupId>com.codeborne</groupId>
-            <artifactId>selenide</artifactId>
+            <artifactId>selenide-testng</artifactId>
             <version>${selenide.version}</version>
         </dependency>
         <dependency>
@@ -104,17 +104,22 @@
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>5.10.2</version>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.junit.jupiter</groupId>-->
+<!--            <artifactId>junit-jupiter-params</artifactId>-->
+<!--            <version>5.10.2</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.25.3</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.9.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.javafaker</groupId>
@@ -201,5 +206,15 @@
             </build>
         </profile>
     </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

@@ -3,6 +3,7 @@ package org.brit.options;
 import org.openqa.selenium.MutableCapabilities;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * @author Serhii Bryt
@@ -17,8 +18,8 @@ public class PlaywrightiumOptions extends MutableCapabilities {
     public PlaywrightiumOptions() {
         super();
         setHeadless(false);
-        setRecordVideo(false);
         setBrowserName("chromium");
+        setRecordsFolder(Paths.get("build/video"));
     }
 
     /**
@@ -66,9 +67,6 @@ public class PlaywrightiumOptions extends MutableCapabilities {
     public Path getRecordsFolder(){
         return (Path) getCapability("recordsFolder");
     }
-
-
-
 
     /**
      * Needs only when Playwrightium is used for running tests remotely

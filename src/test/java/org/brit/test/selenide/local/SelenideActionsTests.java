@@ -1,15 +1,13 @@
-package org.brit.test.selenide;
+package org.brit.test.selenide.local;
 
 import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import com.codeborne.selenide.testng.TextReport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDriverProvider;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.interactions.WheelInput;
+import org.testng.annotations.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,16 +18,24 @@ import java.util.Objects;
 import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Listeners({TextReport.class})
 public class SelenideActionsTests {
 
-    @BeforeAll
-    public static void beforeAll() {
-        Configuration.browser = PWDriverProvider.class.getName();
+    @BeforeClass
+    public void beforeAll() {
+        closeWebDriver();
+
     }
 
-    @BeforeEach
+    @BeforeMethod
     public void beforeEach() {
+        Configuration.browser = PWDriverProvider.class.getName();
         open("https://the-internet.herokuapp.com/large");
+    }
+
+    @AfterClass
+    public static void afterAll(){
+        closeWebDriver();
     }
 
     @Test
