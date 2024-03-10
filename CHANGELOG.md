@@ -1,4 +1,13 @@
 # Changelog
+## 1.2.0 (release 10.03.24)
+* Update Playwrightium options:
+  * Add `recordVideo` capability to indicate weather or not to record a video
+  * Add `recordsFolder` capability to set folder where videos should be saved
+  * Add ability to run tests remotely for Selenoid, Selenium Grid, Aerokube Moon
+* Add method to check if we need to save video when quit driver
+* Add templates in tests for initializing driver for remote use and for video recording.
+* Add tests
+* Update github workflow file to run separately local and remote tests
 
 ## 1.1.1 (release 05.01.24)
 * rebuild javaScript executor. Now if script result is object it returns as JSON
