@@ -1,47 +1,40 @@
 package org.brit.test.playwrightium;
 
-import com.codeborne.selenide.Configuration;
 import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
 import org.brit.additional.PlaywrightiumSelect;
-import org.brit.driver.PWDriverProvider;
 import org.brit.driver.PlaywrightiumDriver;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
-import org.brit.options.PlaywrightiumOptions;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.ISelect;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
-import static com.codeborne.selenide.Selenide.open;
 import static com.codeborne.selenide.Selenide.sleep;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PlaywrightiumBasicTests {
 
     static WebDriver driver;
 
-    @BeforeEach
+    @BeforeClass
     public void beforeClass() {
       //  PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
        // playwrightiumOptions.setRecordsFolder(Paths.get("videos"));
         driver = new PlaywrightiumDriver();
     }
 
-    @AfterEach
+    @AfterClass
     public void afterClass() {
         if (driver != null) {
             driver.quit();
@@ -121,8 +114,8 @@ public class PlaywrightiumBasicTests {
         ((JavascriptExecutor) driver).executeScript("return alert();");
     }
 
-    @ParameterizedTest
-    @MethodSource("dataProvider")
+
+    @Test(dataProvider = "dataProvider")
     public void framesTest(String frameName, String frameText, int elementsCount) {
         driver.get("https://testpages.eviltester.com/styled/frames/frames-test.html");
         driver.switchTo().frame(frameName);
@@ -267,12 +260,12 @@ public class PlaywrightiumBasicTests {
     }
 
 
-    private static Stream<Arguments> dataProvider() {
-        return Stream.of(
-                Arguments.of("left", "Left", 30),
-                Arguments.of("middle", "Middle", 40),
-                Arguments.of("right", "Right", 50)
-        );
+    private Object[][] dataProvider() {
+        return new Object[][]{
+                {"left", "Left", 30},
+                {"middle", "Middle", 40},
+                {"right", "Right", 50}
+        };
     }
 
     private String getWebElementTextById(String id, WebDriver driver) {
