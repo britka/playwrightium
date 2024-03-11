@@ -7,14 +7,15 @@ import org.openqa.selenium.WebDriver;
 
 import javax.annotation.Nonnull;
 
-public class PWDRemoteDriverProvider implements WebDriverProvider {
+public class PWDRemoteDriverWithVideoProvider implements WebDriverProvider {
     @Nonnull
     @Override
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
         PlaywrightiumOptions chromeOptions = new PlaywrightiumOptions();
         chromeOptions.setConnectionByWS(false);
         chromeOptions.setHeadless(true);
-     //   chromeOptions.merge(capabilities);
+        chromeOptions.setRecordVideo(true);
+        chromeOptions.merge(capabilities);
         //new PlaywrightiumDriver("http://moon.aerokube.local", chromeOptions);
         return new PlaywrightiumDriver("http://localhost:4444/wd/hub", chromeOptions);
     }

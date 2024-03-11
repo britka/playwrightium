@@ -11,6 +11,14 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * @author Serhii Bryt
+ *
+ * This is implementation for alerts actions
+ * @see <a href='https://playwright.dev/java/docs/dialogs'>Playwright. Using dialigs(alerts)</a>
+ *
+ */
+
 public class PlaywrightuimAlert implements Alert {
 
     private final PlaywrightiumDriver playwrightiumDriver;

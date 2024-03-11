@@ -8,12 +8,13 @@ import org.openqa.selenium.WebDriver;
 import javax.annotation.Nonnull;
 
 
-public class PWDriverProvider implements WebDriverProvider {
+public class PWDriverWithVideoProvider implements WebDriverProvider {
     @Nonnull
     @Override
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
         PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
         playwrightiumOptions.setHeadless(false);
+        playwrightiumOptions.setRecordVideo(true);
         playwrightiumOptions.merge(capabilities);
         return new PlaywrightiumDriver(playwrightiumOptions);
     }

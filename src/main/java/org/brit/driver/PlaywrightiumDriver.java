@@ -2,7 +2,6 @@ package org.brit.driver;
 
 import com.codeborne.selenide.impl.WebElementSource;
 import com.microsoft.playwright.*;
-import com.microsoft.playwright.Frame;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.MouseButton;
 import com.microsoft.playwright.options.ViewportSize;
@@ -13,14 +12,11 @@ import org.brit.element.PlaywrightWebElement;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.options.PlaywrightiumOptions;
 import org.openqa.selenium.*;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.logging.Logs;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.awt.*;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
@@ -28,7 +24,6 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -43,6 +38,8 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     private Frame mainFrameCopy = null;
 
+    private PlaywrightiumOptions options;
+
 
     @SneakyThrows
     public PlaywrightiumDriver() {
@@ -51,15 +48,22 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     public PlaywrightiumDriver(PlaywrightiumOptions options) {
         playwright = Playwright.create();
+        this.options = options;
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
-        Boolean headless = (Boolean) options.getCapability("headless");
+        Boolean headless = (Boolean) this.options.getCapability("headless");
         launchOptions.setHeadless(headless).setDownloadsPath(Paths.get("downloads"));
-        String browserType = (String) options.getCapability("browserName");
-        Path recordVideoPath = (Path) options.getCapability("recordsFolder");
+        String browserType = (String) this.options.getCapability("browserName");
+        Path recordVideoPath = (Path) this.options.getCapability("recordsFolder");
 
         Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
-        if (recordVideoPath != null) {
-            newContextOptions.setRecordVideoDir(recordVideoPath);
+        boolean recordVideo = this.options.getRecordVideo() != null && options.getRecordVideo();
+
+        if (recordVideo) {
+            if (recordVideoPath != null) {
+                newContextOptions.setRecordVideoDir(recordVideoPath);
+            } else {
+                newContextOptions.setRecordVideoDir(Paths.get("build/videos"));
+            }
         }
 
         browserContext = getBrowserType(browserType)
@@ -84,21 +88,53 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         }
     }
 
-    public PlaywrightiumDriver(String connectUrl) {
-        playwright = Playwright.create();
-        BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
+    /**
+     * Init browser to run remotely. Fo example, on Selenoid, Selenium Grid or Aerokube Moon.
+     * If you connect to the Moon, then you should specify connection via ws in options.
+     *
+     * @param connectUrl the url where you want to connect to. It can be as http as ws
+     * @param options    option for connection
+     */
+    public PlaywrightiumDriver(String connectUrl, PlaywrightiumOptions options) {
+        this.options = options;
+        String browserName = options.getBrowserName();
+        boolean headless = options.getHeadless();
+        boolean getConnectionType = options.getConnectionByWS() != null && options.getConnectionByWS();
 
-        connectUrl = connectUrl.replace("https:", "wss:")
-                .replace("http:", "ws:")
-                .replace("/wd/hub", "");
-        connectUrl = connectUrl + "/playwright/firefox/playwright-1.39.0?headless=true";
 
-        // Boolean headless = (Boolean) capabilities.getCapability("headless");
-        launchOptions.setHeadless(true).setDownloadsPath(Paths.get("downloads"));
-        browserContext = playwright
-                .firefox()
-                .connect(connectUrl)
-                .newContext(new Browser.NewContextOptions().setAcceptDownloads(true));
+        Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
+        boolean recordVideo = options.getRecordVideo() != null && options.getRecordVideo();
+
+
+        if (recordVideo) {
+            if (options.getRecordsFolder() == null) {
+                newContextOptions.setRecordVideoDir(Paths.get("build/video"));
+            } else {
+                newContextOptions.setRecordVideoDir(options.getRecordsFolder());
+            }
+        }
+
+        if (getConnectionType) {
+            playwright = Playwright.create();
+            String playwrightVersion = Playwright.class
+                    .getClassLoader().getDefinedPackage("com.microsoft.playwright")
+                    .getImplementationVersion();
+
+            connectUrl = connectUrl.replace("https:", "wss:")
+                    .replace("http:", "ws:")
+                    .replace("/wd/hub", "");
+            connectUrl = connectUrl + "/playwright/%s/playwright-%s?headless=%s&enableVNC=true&enableVideo=%s"
+                    .formatted(browserName, playwrightVersion, headless, recordVideo);
+            browserContext = getBrowserType(browserName)
+                    .connect(connectUrl, new BrowserType.ConnectOptions().setExposeNetwork("*"))
+                    .newContext(newContextOptions);
+        } else {
+            playwright = Playwright.create(new Playwright.CreateOptions()
+                    .setEnv(Map.of("SELENIUM_REMOTE_URL", connectUrl)));
+            browserContext = getBrowserType(browserName)
+                    .launch(new BrowserType.LaunchOptions().setHeadless(headless))
+                    .newContext(newContextOptions);
+        }
         page = browserContext.newPage();
     }
 
@@ -235,8 +271,23 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public void quit() {
-        page.context().close();
+        page.close();
+        saveVideoIfNeeded();
+        if (!page.isClosed()){
+            page.close();
+        }
+        browserContext.close();
         playwright.close();
+    }
+
+    private void saveVideoIfNeeded(){
+        if (options.getConnectionByWS() != null
+                && options.getConnectionByWS()
+                && options.getRecordVideo() != null
+                && options.getRecordVideo()) {
+            String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+            page.video().saveAs(Path.of(options.getRecordsFolder().toString(), uuid + ".webm"));
+        }
     }
 
     @Override
@@ -286,7 +337,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public Options manage() {
-        return new PlawrightWebdriverOptions();
+        return new PlaywrightWebdriverOptions();
     }
 
     @Override
@@ -304,9 +355,9 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     }
 
 
-    public class PlawrightWebdriverOptions implements Options {
+    public class PlaywrightWebdriverOptions implements Options {
 
-        public PlawrightWebdriverOptions() {
+        public PlaywrightWebdriverOptions() {
         }
 
         @Override
@@ -864,4 +915,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     }
 
+    public PlaywrightiumOptions getOptions() {
+        return options;
+    }
 }

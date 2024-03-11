@@ -1,21 +1,21 @@
-package org.brit.test.selenide;
+package org.brit.test.selenide.local;
 
 import com.codeborne.selenide.*;
-import com.codeborne.selenide.junit5.TextReportExtension;
+import com.codeborne.selenide.testng.TextReport;
 import com.github.javafaker.Faker;
+import com.microsoft.playwright.options.AriaRole;
+import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDriverProvider;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.brit.locators.ArialSearchOptions;
+import org.brit.locators.PlaywrightiumBy;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.interactions.WheelInput;
+import org.testng.annotations.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Condition.text;
@@ -23,22 +23,31 @@ import static com.codeborne.selenide.Selectors.byId;
 import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith({TextReportExtension.class})
+@Listeners({TextReport.class})
 public class SelenideBasicTests {
+    @BeforeClass
+    public void beforeAll() {
+        closeWebDriver();
+
+    }
+
+    @BeforeMethod
+    public void beforeMethod(){
+        Configuration.browser = PWDriverProvider.class.getName();
+    }
+
+    @AfterClass
+    public void afterAll() {
+        closeWebDriver();
+    }
+
     @Test
     public void basicFunctionalTests() {
-
-        Configuration.browser = PWDriverProvider.class.getName();
         Configuration.timeout = 10000;
         Configuration.headless = false;
-
         final String url = "https://testpages.herokuapp.com/styled/basic-html-form-test.html";
-
         open(url);
-
-
         Faker faker = new Faker();
-
         String name = faker.internet().emailAddress("some+2334777");
         String password = faker.internet().password();
 
@@ -110,7 +119,6 @@ public class SelenideBasicTests {
      */
     @Test
     public void alertsTest() {
-        Configuration.browser = PWDriverProvider.class.getName();
         Configuration.timeout = 10000;
 
         open("https://testpages.eviltester.com/styled/alerts/alert-test.html");
@@ -144,9 +152,22 @@ public class SelenideBasicTests {
 
     }
 
+    @Test
+    public void downloadTest() throws IOException {
+        Faker faker = new Faker();
+        File test = File.createTempFile("test", null);
+        String paragraph = faker.lorem().paragraph(6);
+        FileUtils.writeStringToFile(test, paragraph, Charset.defaultCharset());
+        open("https://the-internet.herokuapp.com/upload");
+        $("#file-upload").uploadFile(test);
+        $(PlaywrightiumBy.byRole(AriaRole.BUTTON, new ArialSearchOptions().setName("Upload"))).click();
+        $("#uploaded-files").shouldHave(text(test.getName()));
+        open("https://the-internet.herokuapp.com/download");
+        File download = $(By.linkText(test.getName())).download();
+        assertThat(test).hasSameTextualContentAs(download);
+    }
 
-    @ParameterizedTest
-    @MethodSource("dataProvider")
+    @Test(dataProvider = "dataProvider")
     public void framesTest(String frameName, String frameText, int elementsCount) {
         open("https://testpages.eviltester.com/styled/frames/frames-test.html");
         switchTo().frame(frameName);
@@ -156,13 +177,13 @@ public class SelenideBasicTests {
         $$x("//frame").shouldHave(CollectionCondition.size(5));
     }
 
-
-    private static Stream<Arguments> dataProvider() {
-        return Stream.of(
-                Arguments.of("left", "Left", 30),
-                Arguments.of("middle", "Middle", 40),
-                Arguments.of("right", "Right", 50)
-        );
+    @DataProvider
+    private Object[][] dataProvider() {
+        return new Object[][]{
+                {"left", "Left", 30},
+                {"middle", "Middle", 40},
+                {"right", "Right", 50}
+        };
     }
 
     private String getWebElementTextById(String id) {
