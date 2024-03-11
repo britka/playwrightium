@@ -248,6 +248,6 @@ E.g.
 Configuration.browser = PWDriverProvider.class.getName();
 ```
 And that's all. You can easily use it with Selenide.
-See [test for Selenide](src/test/java/org/brit/test/selenide/SelenideBasicTests.java)
+See [test for Selenide](src/test/java/org/brit/test/selenide/)
 
 Enjoy!
