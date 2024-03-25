@@ -5,6 +5,24 @@ on:
       - '**'
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch: 
+    inputs:
+      playwrighium_local_tests: 
+        description: Tests for local tests
+        type: string
+        default: org.brit.test.selenide.local.**.*
+      playwrightium_selenoid_tests:
+        description: Tests for remote tests
+        type: string
+        default: org.brit.test.selenide.remote.**.*
+      option_parameter:
+        description: Some parameter option
+        type: choice
+        options:
+          - option_1
+          - option_2
+          - option_3
+        default: option_1      
 permissions:
   contents: read
   actions: read
@@ -26,7 +44,7 @@ jobs:
       - name: Build & Install
         run: mvn -B install -DskipTests --no-transfer-progress
       - name: Run tests
-        run: xvfb-run mvn test -Dtest=org.brit.test.selenide.local.**.*
+        run: xvfb-run mvn test -Dtest=${{ inputs.playwrighium_local_tests }}
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
@@ -54,7 +72,7 @@ jobs:
       - name: Build & Install
         run: mvn -B install -DskipTests --no-transfer-progress
       - name: Run tests
-        run: mvn test -Dtest=org.brit.test.selenide.remote.**.*
+        run: mvn test -Dtest=${{ inputs.playwrightium_selenoid_tests }}
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
