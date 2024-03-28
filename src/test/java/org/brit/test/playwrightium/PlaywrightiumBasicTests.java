@@ -243,22 +243,11 @@ public class PlaywrightiumBasicTests {
     }
 
     @Test
-    public void scrollTest() {
-
-        driver.get("https://the-internet.herokuapp.com/large");
-        System.out.println(driver.findElement(By.id("large-table")).isDisplayed());
-//        actions()
-//                .scrollToElement($("#large-table"))
-//                .build()
-//                .perform();
-
-//        actions()
-//                .scrollByAmount()
-//                .build()
-//                .perform();
-        sleep(3000);
+    public void sendKeysTest(){
+        driver.get("https://google.com");
+        WebElement element = driver.findElement(By.name("q"));
+        element.sendKeys("Playwright.", "dev", Keys.ENTER);
     }
-
 
     private Object[][] dataProvider() {
         return new Object[][]{
