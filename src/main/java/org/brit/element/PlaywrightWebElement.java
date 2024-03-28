@@ -3,6 +3,7 @@ package org.brit.element;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.BoundingBox;
+import org.apache.commons.text.CaseUtils;
 import org.brit.locators.ArialSearchOptions;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -60,14 +61,31 @@ public class PlaywrightWebElement extends RemoteWebElement {
 
     @Override
     public void sendKeys(CharSequence... keysToSend) {
-        StringBuilder toSend = new StringBuilder();
-        for (CharSequence charSequence : keysToSend) {
-            toSend.append(charSequence);
-        }
         if ("file".equals(locator.getAttribute("type"))) {
+            StringBuilder toSend = new StringBuilder();
+            for (CharSequence charSequence : keysToSend) {
+                toSend.append(charSequence);
+            }
             locator.setInputFiles(Paths.get(toSend.toString()));
         } else {
-            locator.fill(toSend.toString());
+            for (CharSequence charSequence : keysToSend) {
+                if (charSequence.length() == 1) {
+                    if (Keys.getKeyFromUnicode(charSequence.charAt(0)) != null) {
+                        var keyToPress = CaseUtils
+                                .toCamelCase(Keys.getKeyFromUnicode(charSequence.charAt(0)).name(), true, ' ');
+                        keyToPress = switch (keyToPress) {
+                            case "Left" -> "ArrowLeft";
+                            case "Up" -> "ArrowUp";
+                            case "Down" -> "ArrowDown";
+                            case "Right" -> "ArrowRight";
+                            default -> keyToPress;
+                        };
+                        locator.press(keyToPress);
+                    }
+                }else {
+                    locator.pressSequentially(charSequence.toString());
+                }
+            }
         }
     }
 
@@ -160,31 +178,31 @@ public class PlaywrightWebElement extends RemoteWebElement {
     private Locator.GetByRoleOptions convertOption(ArialSearchOptions arialSearchOptions) {
         Object name = arialSearchOptions.getName();
         Locator.GetByRoleOptions getByRoleOptions = new Locator.GetByRoleOptions();
-        if (arialSearchOptions.checked != null){
+        if (arialSearchOptions.checked != null) {
             getByRoleOptions.setChecked(arialSearchOptions.getChecked());
         }
-        if (arialSearchOptions.exact != null){
+        if (arialSearchOptions.exact != null) {
             getByRoleOptions.setExact(arialSearchOptions.getExact());
         }
-        if (arialSearchOptions.disabled != null){
+        if (arialSearchOptions.disabled != null) {
             getByRoleOptions.setDisabled(arialSearchOptions.getDisabled());
         }
-        if (arialSearchOptions.expanded != null){
+        if (arialSearchOptions.expanded != null) {
             getByRoleOptions.setExpanded(arialSearchOptions.getExpanded());
         }
-        if (arialSearchOptions.pressed != null){
+        if (arialSearchOptions.pressed != null) {
             getByRoleOptions.setPressed(arialSearchOptions.getPressed());
         }
-        if (arialSearchOptions.selected != null){
+        if (arialSearchOptions.selected != null) {
             getByRoleOptions.setSelected(arialSearchOptions.getSelected());
         }
-        if (arialSearchOptions.includeHidden != null){
+        if (arialSearchOptions.includeHidden != null) {
             getByRoleOptions.setIncludeHidden(arialSearchOptions.getIncludeHidden());
         }
-        if (arialSearchOptions.level != null){
+        if (arialSearchOptions.level != null) {
             getByRoleOptions.setLevel(arialSearchOptions.getLevel());
         }
-        if (arialSearchOptions.name != null){
+        if (arialSearchOptions.name != null) {
             if (name instanceof Pattern) {
                 getByRoleOptions.setName((Pattern) name);
             } else if (name instanceof String) {
@@ -223,8 +241,8 @@ public class PlaywrightWebElement extends RemoteWebElement {
     public String getCssValue(String propertyName) {
         return locator
                 .evaluate("element => " +
-                          "window.getComputedStyle(element).getPropertyValue('%s')"
-                                  .formatted(propertyName))
+                        "window.getComputedStyle(element).getPropertyValue('%s')"
+                                .formatted(propertyName))
                 .toString();
 
     }

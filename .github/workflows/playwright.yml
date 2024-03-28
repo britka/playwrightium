@@ -5,24 +5,7 @@ on:
       - '**'
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch: 
-    inputs:
-      playwrighium_local_tests: 
-        description: Tests for local tests
-        type: string
-        default: org.brit.test.selenide.local.**.*
-      playwrightium_selenoid_tests:
-        description: Tests for remote tests
-        type: string
-        default: org.brit.test.selenide.remote.**.*
-      option_parameter:
-        description: Some parameter option
-        type: choice
-        options:
-          - option_1
-          - option_2
-          - option_3
-        default: option_1      
+
 permissions:
   contents: read
   actions: read
@@ -34,7 +17,7 @@ jobs:
     name: 'Playwrightuim local Tests'
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright/java:v1.41.2-jammy
+      image: mcr.microsoft.com/playwright/java:v1.42.0-jammy
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -44,7 +27,7 @@ jobs:
       - name: Build & Install
         run: mvn -B install -DskipTests --no-transfer-progress
       - name: Run tests
-        run: xvfb-run mvn test -Dtest=${{ inputs.playwrighium_local_tests }}
+        run: xvfb-run mvn test -Dtest=org.brit.test.selenide.local.**.*
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
@@ -72,7 +55,7 @@ jobs:
       - name: Build & Install
         run: mvn -B install -DskipTests --no-transfer-progress
       - name: Run tests
-        run: mvn test -Dtest=${{ inputs.playwrightium_selenoid_tests }}
+        run: mvn test -Dtest=org.brit.test.selenide.remote.**.*
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
