@@ -1,4 +1,13 @@
 # Changelog
+## 1.2.1 (release 28.03.24)
+* Update `sendKeys` method. Now you can do such things as  
+```java
+webElement.sendKeys("Test", Keys.ENTER);
+```
+* Update tests
+* Update dependencies
+* Update github workflows
+
 ## 1.2.0 (release 10.03.24)
 * Update Playwrightium options:
   * Add `recordVideo` capability to indicate weather or not to record a video
