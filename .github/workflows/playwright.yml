@@ -63,3 +63,10 @@ jobs:
           check_name: 'Playwrightium remote tests results'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
           include_passed: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Images
+          path: build/reports/tests
+          compression-level: 9
+          retention-days: 15
+
