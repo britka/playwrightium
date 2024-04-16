@@ -1,4 +1,4 @@
-name: Playwrightium Tests
+name: Playwrightium Tests Manual
 on:
   workflow_dispatch:
     inputs:
