@@ -53,6 +53,6 @@ public class SelenideDevicesTests {
                 new ArialSearchOptions().setName(Pattern.compile("Your Location"))))
                 .as("Your location button")
                 .click();
-        webdriver().shouldHave(urlContaining("43.65581")).shouldHave(urlContaining("32.6178"));
+        webdriver().shouldHave(urlContaining("46.65581")).shouldHave(urlContaining("32.6178"));
     }
 }
