@@ -35,6 +35,8 @@ jobs:
           check_name: 'Playwrightium local tests results'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
           include_passed: true
+      - name: View images folder
+        run: ls target/reports/
       - name: Upload images
         uses: actions/upload-artifact@v2
         if: always()
