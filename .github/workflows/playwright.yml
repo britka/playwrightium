@@ -66,7 +66,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Images
-          path: build/reports/tests
+          path: build/reports/tests/
           compression-level: 9
           retention-days: 15
 
