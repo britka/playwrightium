@@ -18,7 +18,7 @@ public class PWDriverProvider implements WebDriverProvider {
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
         PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
         playwrightiumOptions.setHeadless(false);
-        playwrightiumOptions.setGeolocation(new Geolocation(46.65581, 32.6178));
+        playwrightiumOptions.setGeolocation(new Geolocation(46.655, 32.617));
         playwrightiumOptions.setPermissions(List.of(Permissions.GEOLOCATION));
         playwrightiumOptions.merge(capabilities);
         playwrightiumOptions.setBrowserName(Browsers.CHROMIUM);
