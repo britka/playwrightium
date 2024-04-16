@@ -35,7 +35,8 @@ jobs:
           check_name: 'Playwrightium local tests results'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
           include_passed: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: Images
           path: build/reports/
@@ -68,7 +69,8 @@ jobs:
           check_name: 'Playwrightium remote tests results'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
           include_passed: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: Images selenoid tests
           path: build/reports/
