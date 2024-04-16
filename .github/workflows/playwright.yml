@@ -38,8 +38,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Images
-          path: build/reports/tests/
-          compression-level: 9
+          path: build/reports/
           retention-days: 15
   playwrightium_selenoid:
     name: 'Playwrightium remote tests'
@@ -71,8 +70,7 @@ jobs:
           include_passed: true
       - uses: actions/upload-artifact@v4
         with:
-          name: Images
-          path: build/reports/tests/
-          compression-level: 9
+          name: Images selenoid tests
+          path: build/reports/
           retention-days: 15
 
