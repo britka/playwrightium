@@ -1,11 +1,11 @@
 name: Playwrightium Tests
 on:
-  push:
-    branches:
-      - '**'
-  pull_request:
-    branches: [ main, master ]
-
+  workflow_dispatch:
+    inputs:
+      tests:
+        type: string
+        description: Tests
+        default: org.brit.test.selenide.local.**.*
 permissions:
   contents: write
   actions: write
@@ -27,7 +27,7 @@ jobs:
       - name: Build & Install
         run: mvn -B install -DskipTests --no-transfer-progress
       - name: Run tests
-        run: xvfb-run mvn test -Dtest=org.brit.test.selenide.local.**.*
+        run: xvfb-run mvn test -Dtest=${{ input.tests }}
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
