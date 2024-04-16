@@ -1,14 +1,11 @@
 package org.brit.driver;
 
 import com.codeborne.selenide.WebDriverProvider;
-import com.microsoft.playwright.options.Geolocation;
 import org.brit.options.PlaywrightiumOptions;
-import org.brit.permission.Permissions;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 
 public class PWDriverProvider implements WebDriverProvider {
