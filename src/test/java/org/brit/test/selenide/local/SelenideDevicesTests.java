@@ -50,10 +50,8 @@ public class SelenideDevicesTests {
     @Test
     public void geolocationTest(){
         Configuration.browser = PWDriverProvider.class.getName();
-        open("https://maps.google.com");
-        $("#mylocation button")
-                .as("Your location button")
-                .click();
-        webdriver().shouldHave(urlContaining("46.65581")).shouldHave(urlContaining("32.6178"));
+        open("https://www.bing.com/maps");
+        $(".locateMeBtn").click();
+        webdriver().shouldHave(urlContaining("46.655")).shouldHave(urlContaining("32.617"));
     }
 }
