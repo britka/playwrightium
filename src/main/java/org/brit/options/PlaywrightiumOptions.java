@@ -1,9 +1,15 @@
 package org.brit.options;
 
+import com.microsoft.playwright.options.Geolocation;
+import org.apache.commons.lang3.LocaleUtils;
+import org.brit.emulation.Device;
+import org.brit.permission.Permissions;
 import org.openqa.selenium.MutableCapabilities;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZoneId;
+import java.util.*;
 
 /**
  * @author Serhii Bryt
@@ -83,5 +89,45 @@ public class PlaywrightiumOptions extends MutableCapabilities {
 
     public Boolean getConnectionByWS(){
         return (Boolean) getCapability("connectionByWS");
+    }
+
+    public void setEmulation(Device device){
+        setCapability("emulation", device);
+    }
+
+    public Device getEmulation(){
+        return (Device) getCapability("emulation");
+    }
+
+    public void setLocale(Locale locale){
+        setCapability("locale", locale);
+    }
+
+    public Locale getLocale(){
+        return (Locale) getCapability("locale");
+    }
+
+    public void setTimeZone(TimeZone timeZone){
+        setCapability("timeZone", timeZone);
+    }
+
+    public TimeZone getTimeZone(){
+        return (TimeZone) getCapability("timeZone");
+    }
+
+    public void setGeolocation(Geolocation geolocation){
+        setCapability("geolocation", geolocation);
+    }
+
+    public Geolocation getGeolocation(){
+        return (Geolocation) getCapability("geolocation");
+    }
+
+    public void setPermissions(List<Permissions> permissions){
+        setCapability("permissions", permissions);
+    }
+
+    public List<Permissions> getPermissions(){
+        return (List<Permissions>) getCapability("permissions");
     }
 }

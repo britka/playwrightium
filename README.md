@@ -201,9 +201,9 @@ and after that it uses `ffmpeg` to create video from images.
 
 Initialize Playwrightium driver using `PlaywrightiumOptions` class
 ```java
-PlaywrightiumOptions chromeOptions = new PlaywrightiumOptions();
-chromeOptions.setConnectionByWS(false);
-chromeOptions.setHeadless(true);
+PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
+playwrightiumOptions.setConnectionByWS(false);
+playwrightiumOptions.setHeadless(true);
 return new PlaywrightiumDriver("http://localhost:4444/wd/hub", chromeOptions);
 ```
 
@@ -217,10 +217,10 @@ return new PlaywrightiumDriver("http://localhost:4444/wd/hub", chromeOptions);
 
 Initialize Playwrightium driver using `PlaywrightiumOptions` class
 ```java
-PlaywrightiumOptions chromeOptions = new PlaywrightiumOptions();
-chromeOptions.setConnectionByWS(true);
-chromeOptions.setHeadless(true);
-return new PlaywrightiumDriver("http://localhost:4444/wd/hub", chromeOptions);
+PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
+playwrightiumOptions.setConnectionByWS(true);
+playwrightiumOptions.setHeadless(true);
+return new PlaywrightiumDriver("http://localhost:4444/wd/hub", playwrightiumOptions);
 ```
 
 > [!IMPORTANT]
@@ -235,9 +235,9 @@ public class PWDriverProvider implements WebDriverProvider {
     @Nonnull
     @Override
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
-        PlaywrightWebdriverOptions chromeOptions = new PlaywrightWebdriverOptions();
-        chromeOptions.merge(capabilities);
-        return new PlaywrightiumDriver(chromeOptions);
+        PlaywrightWebdriverOptions playwrightiumOptions = new PlaywrightWebdriverOptions();
+      playwrightiumOptions.merge(capabilities);
+        return new PlaywrightiumDriver(playwrightiumOptions);
     }
 }
 ```

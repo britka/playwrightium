@@ -1,4 +1,11 @@
 # Changelog
+## 1.3.0
+* Geolocation added
+* Device emulation added
+* Permissions added
+* Locale added
+* TimeZone added
+
 ## 1.2.1 (release 28.03.24)
 * Update `sendKeys` method. Now you can do such things as  
 ```java

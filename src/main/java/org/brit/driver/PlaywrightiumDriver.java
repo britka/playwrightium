@@ -3,14 +3,17 @@ package org.brit.driver;
 import com.codeborne.selenide.impl.WebElementSource;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.Geolocation;
 import com.microsoft.playwright.options.MouseButton;
 import com.microsoft.playwright.options.ViewportSize;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.text.CaseUtils;
 import org.brit.element.PlaywrightWebElement;
+import org.brit.emulation.Device;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.options.PlaywrightiumOptions;
+import org.brit.permission.Permissions;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
@@ -52,8 +55,13 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
         Boolean headless = (Boolean) this.options.getCapability("headless");
         launchOptions.setHeadless(headless).setDownloadsPath(Paths.get("downloads"));
+        Device device = this.options.getEmulation();
         String browserType = (String) this.options.getCapability("browserName");
         Path recordVideoPath = (Path) this.options.getCapability("recordsFolder");
+        Locale locale = this.options.getLocale();
+        TimeZone timeZone = this.options.getTimeZone();
+        Geolocation geolocation = this.options.getGeolocation();
+        List<Permissions> permissions = this.options.getPermissions();
 
         Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
         boolean recordVideo = this.options.getRecordVideo() != null && options.getRecordVideo();
@@ -66,9 +74,36 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
             }
         }
 
-        browserContext = getBrowserType(browserType)
-                .launch(launchOptions)
-                .newContext(newContextOptions);
+        if (locale != null){
+            newContextOptions.setLocale(locale.toLanguageTag());
+        }
+        if (timeZone != null){
+            newContextOptions.setTimezoneId(timeZone.getID());
+        }
+        if (geolocation != null){
+            newContextOptions.setGeolocation(geolocation);
+        }
+        if (permissions != null){
+            newContextOptions.setPermissions(permissions.stream().map(Permissions::getValue).toList());
+        }
+
+        if (device != null) {
+            newContextOptions
+                    .setDeviceScaleFactor(device.getDeviceScaleFactor())
+                    .setHasTouch(device.isHasTouch())
+                    .setIsMobile(device.isMobile())
+                    .setUserAgent(device.getUserAgent())
+                    .setViewportSize(device.getViewport());
+            browserContext =
+                    getBrowserType(device.getDefaultBrowserType())
+                            .launch(launchOptions)
+                            .newContext(newContextOptions);
+        } else {
+            browserContext = getBrowserType(browserType)
+                    .launch(launchOptions)
+                    .newContext(newContextOptions);
+        }
+
         page = browserContext.newPage();
     }
 
@@ -273,14 +308,14 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     public void quit() {
         page.close();
         saveVideoIfNeeded();
-        if (!page.isClosed()){
+        if (!page.isClosed()) {
             page.close();
         }
         browserContext.close();
         playwright.close();
     }
 
-    private void saveVideoIfNeeded(){
+    private void saveVideoIfNeeded() {
         if (options.getConnectionByWS() != null
                 && options.getConnectionByWS()
                 && options.getRecordVideo() != null
