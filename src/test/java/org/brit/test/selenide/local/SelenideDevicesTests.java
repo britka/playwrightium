@@ -3,6 +3,7 @@ package org.brit.test.selenide.local;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.conditions.webdriver.UrlCondition;
+import com.codeborne.selenide.testng.TextReport;
 import com.microsoft.playwright.options.AriaRole;
 import org.brit.driver.PWDriverDeviceProvider;
 import org.brit.driver.PWDriverProvider;
@@ -10,7 +11,9 @@ import org.brit.emulation.Device;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
 import org.openqa.selenium.Dimension;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import org.testng.reporters.TextReporter;
 
 import java.util.regex.Pattern;
 
@@ -25,6 +28,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
  * Created by Serhii Bryt
  * 01.04.2024 16:18
  **/
+@Listeners({TextReport.class})
 public class SelenideDevicesTests {
     @Test
     public void deviceTest() {
@@ -45,7 +49,9 @@ public class SelenideDevicesTests {
         Configuration.browser = PWDriverProvider.class.getName();
         open("https://maps.google.com");
         $(PlaywrightiumBy.byRole(AriaRole.BUTTON,
-                new ArialSearchOptions().setName(Pattern.compile("Your Location")))).click();
+                new ArialSearchOptions().setName(Pattern.compile("Your Location"))))
+                .as("Your location button")
+                .click();
         webdriver().shouldHave(urlContaining("46.65581")).shouldHave(urlContaining("32.6178"));
     }
 }
