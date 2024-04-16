@@ -39,7 +39,9 @@ jobs:
         if: always()
         with:
           name: Images
-          path: build/reports/
+          path: |
+            build/reports/
+            target/reports/
           retention-days: 15
   playwrightium_selenoid:
     name: 'Playwrightium remote tests'
@@ -73,6 +75,8 @@ jobs:
         if: always()
         with:
           name: Images selenoid tests
-          path: build/reports/
+          path: |
+            build/reports/
+            target/reports
           retention-days: 15
 
