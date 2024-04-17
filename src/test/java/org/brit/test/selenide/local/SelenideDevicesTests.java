@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import org.testng.reporters.TextReporter;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 import static com.codeborne.selenide.Selenide.*;
@@ -48,9 +49,11 @@ public class SelenideDevicesTests {
     }
 
     @Test
-    public void geolocationTest(){
+    public void geolocationTest() throws IOException {
         Configuration.browser = PWDriverProvider.class.getName();
         open("https://www.bing.com/maps");
+        sleep(5000);
+        FileUtils.writeByteArrayToFile(new File("screen.png"), screenshot(OutputType.BYTES));
         $("#locateMe button.locateMeBtn").click();
         webdriver().shouldHave(urlContaining("46.655")).shouldHave(urlContaining("32.617"));
     }
