@@ -35,14 +35,14 @@ jobs:
           check_name: 'Playwrightium local tests results'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
           include_passed: true
-      - name: Upload videos
-        uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: Videos
-          path: |
-            build/video/
-            screen.png
+#      - name: Upload videos
+#        uses: actions/upload-artifact@v2
+#        if: always()
+#        with:
+#          name: Videos
+#          path: |
+#            build/video/
+#            screen.png
   playwrightium_selenoid:
     name: 'Playwrightium remote tests'
     runs-on: ubuntu-latest

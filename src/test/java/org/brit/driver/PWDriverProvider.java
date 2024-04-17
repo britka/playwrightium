@@ -20,7 +20,6 @@ public class PWDriverProvider implements WebDriverProvider {
         playwrightiumOptions.setGeolocation(new Geolocation(46.655, 32.617));
         playwrightiumOptions.setPermissions(List.of(Permissions.GEOLOCATION));
         playwrightiumOptions.merge(capabilities);
-        playwrightiumOptions.setRecordVideo(true);
         return new PlaywrightiumDriver(playwrightiumOptions);
     }
 }
