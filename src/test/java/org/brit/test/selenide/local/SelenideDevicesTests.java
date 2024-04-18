@@ -13,6 +13,7 @@ import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.reporters.TextReporter;
@@ -35,6 +36,12 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
  **/
 @Listeners({TextReport.class})
 public class SelenideDevicesTests {
+
+    @AfterMethod
+    public void afterMethod(){
+        closeWebDriver();
+    }
+
     @Test
     public void deviceTest() {
         Configuration.browser = PWDriverDeviceProvider.class.getName();
