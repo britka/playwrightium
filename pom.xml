@@ -34,7 +34,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <playwright.version>1.43.0</playwright.version>
-        <selenide.version>7.2.3</selenide.version>
+        <selenide.version>7.3.1</selenide.version>
     </properties>
 
     <distributionManagement>
