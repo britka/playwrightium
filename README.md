@@ -1,6 +1,6 @@
 # Playwrightium
 ![Build status](https://github.com/britka/playwrightium/actions/workflows/playwright.yml/badge.svg)
-[![Maven central]https://img.shields.io/maven-central/v/io.github.britka/playwrightium.svg](https://central.sonatype.com/search?q=playwrightium)
+[![Maven central](https://img.shields.io/maven-central/v/io.github.britka/playwrightium.svg)](https://central.sonatype.com/search?q=playwrightium)
 
 ## Intro
 
