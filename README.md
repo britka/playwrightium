@@ -2,6 +2,7 @@
 ![Build status](https://github.com/britka/playwrightium/actions/workflows/playwright.yml/badge.svg)
 [![Maven central](https://img.shields.io/maven-central/v/io.github.britka/playwrightium.svg)](https://central.sonatype.com/artifact/io.github.britka/playwrightium)
 [![Telegram channel](https://img.shields.io/badge/Telegram-channel-blue.svg)](https://t.me/playwrightiumProject)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/britka/playwrightium/blob/main/LICENSE)
 
 ## Intro
 
