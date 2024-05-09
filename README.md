@@ -1,5 +1,5 @@
 # Playwrightium
-![Build status](https://github.com/britka/playwrightium/blob/main/.github/workflows/playwright.yml/badge.svg)
+![Build status](https://github.com/britka/playwrightium/actions/workflows/playwright.yml/badge.svg)
 
 ## Intro
 
