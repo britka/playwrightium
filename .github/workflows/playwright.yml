@@ -49,7 +49,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.13.0
+        uses: s4u/setup-maven-action@v1.14.0
       - name: install playwright
         run: mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install"
       - name: Build & Install
