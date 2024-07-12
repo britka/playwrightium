@@ -52,6 +52,8 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     }
 
     public PlaywrightiumDriver(PlaywrightiumOptions options) {
+        this.options = options;
+
         Boolean doNotDownloadBrowsers = this.options.getSkipDownloadBrowsers();
 
         if (doNotDownloadBrowsers != null && doNotDownloadBrowsers) {
@@ -59,7 +61,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         } else {
             playwright = Playwright.create();
         }
-        this.options = options;
+
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
         Boolean headless = (Boolean) this.options.getCapability("headless");
         launchOptions.setHeadless(headless).setDownloadsPath(Paths.get("downloads"));
