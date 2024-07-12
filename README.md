@@ -49,9 +49,19 @@ For example:
 
 ```java
 WebDriver driver = new PlaywrightiumDriver();
-driver.get("https://example.com");
-driver.findElement(By.name("username")).sendKeys("Some value");
-driver.findElement(By.cssSelector("input[value=submit][name=submitbutton]")).click();
+driver.
+
+get("https://example.com");
+driver.
+
+findElement(By.name("username")).
+
+sendKeys("Some value");
+driver.
+
+findElement(By.cssSelector("input[value=submit][name=submitbutton]")).
+
+click();
 ```
 
 If you need more example please refer to
@@ -65,6 +75,17 @@ the [playwrightium tests](src/test/java/org/brit/test/playwrightium/Playwrightiu
 * webkit (Safari)
 
 After installation your test will run.
+
+> [!NOTE]
+> If you want to skip browsers download you should set up this using `PlaywrightiumOptions` and tell `Playwrightium` to use local browser
+
+Example: 
+```java
+PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
+playwrightiumOptions.setSkipDownloadBrowsers(true);
+playwrightiumOptions.setBrowserName(Browsers.CHROME_CHANNEL);
+PlaywrightiumDriver playwrightiumDriver = new PlaywrightiumDriver(playwrightiumOptions);
+```
 
 ## What Playwrightium can do
 
@@ -112,7 +133,9 @@ For example:
 import org.openqa.selenium.WebElement;
 
 WebElement submitButton = driver.findElement(PlaywrightiumBy.byRole(AriaRole.BUTTON, AriaRoleOptions.builder().setName("submit").build()));
-WebElement driver.findElement(PlaywrightiumBy.byLabel("LabeText", true));
+WebElement driver.
+
+findElement(PlaywrightiumBy.byLabel("LabeText", true));
 ```
 
 ### Work with WebElements
@@ -121,29 +144,43 @@ For example
 
 ```java
 var name = element.getAttribute("name");
-element.click();
-element.isDisplayed();
-element.getText();
+element.
+
+click();
+element.
+
+isDisplayed();
+element.
+
+getText();
 ```
 
 ### Switch to frame
 
 ```java
-driver.switchTo().frame("frameName");
+driver.switchTo().
+
+frame("frameName");
 ```
 
 ### Works with Select webelement
 
 ```java
 ISelect select = new PlaywrightiumSelect(driver.findElement(By.name("dropdown"))); 
-select.selectByValue("dd"+faker.number().numberBetween(1,7));
+select.
+
+selectByValue("dd"+faker.number().
+
+numberBetween(1,7));
 String selectValue = select.getFirstSelectedOption().getAttribute("value");
 ```
 
 * Use waiters
 
 ```java
- new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(.,'Processed Form Details')]")));
+ new WebDriverWait(driver, Duration.ofSeconds(10)).
+
+until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(.,'Processed Form Details')]")));
 ```
 
 ### Use alerts
@@ -156,20 +193,36 @@ So the example will be
 ```java
 // At first describe what we want to do with alert
 Alert alert = driver.switchTo().alert();
-alert.sendKeys(testString);
-alert.accept();
+alert.
+
+sendKeys(testString);
+alert.
+
+accept();
 
 // After we do some actions that will lead to alert appearance.
-driver.findElement(By.id("promptexample")).click();
+driver.
+
+findElement(By.id("promptexample")).
+
+click();
 
 // After we can make some checks
-assertThat(alert.getText()).isEqualTo("I prompt you");
+assertThat(alert.getText()).
+
+isEqualTo("I prompt you");
 ```
 
 ### Use Actions class
 
 ```java
-new Actions(driver).moveToElement(driver.findElement(By.id("someId"))).build().perform();
+new Actions(driver).
+
+moveToElement(driver.findElement(By.id("someId"))).
+
+build().
+
+perform();
 ```
 
 > [!IMPORTANT]
@@ -178,7 +231,9 @@ new Actions(driver).moveToElement(driver.findElement(By.id("someId"))).build().p
 ### Run JavaScript scripts
 
 ```java
-((JavascriptExecutor)driver).executeScript("return alert();");
+((JavascriptExecutor)driver).
+
+executeScript("return alert();");
 ```
 
 ### Record video
@@ -187,8 +242,13 @@ Initialize Playwrightium driver using `PlaywrightiumOptions` class
 
 ```java
 PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
-playwrightiumOptions.setRecordVideo(true);
-driver = new PlaywrightiumDriver(playwrightiumOptions);
+playwrightiumOptions.
+
+setRecordVideo(true);
+
+driver =new
+
+PlaywrightiumDriver(playwrightiumOptions);
 ```
 
 > [!IMPORTANT]
@@ -198,9 +258,15 @@ or to initialize records folder
 
 ```java
 PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
-playwrightiumOptions.setRecordVideo(true);
-playwrightiumOptions.setRecordsFolder(Path.of("videosFolder"));
-driver = new PlaywrightiumDriver(playwrightiumOptions);
+playwrightiumOptions.
+
+setRecordVideo(true);
+playwrightiumOptions.
+
+setRecordsFolder(Path.of("videosFolder"));
+driver =new
+
+PlaywrightiumDriver(playwrightiumOptions);
 ```
 
 > [!IMPORTANT]
@@ -239,9 +305,15 @@ Initialize Playwrightium driver using `PlaywrightiumOptions` class
 
 ```java
 PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
-playwrightiumOptions.setConnectionByWS(false);
-playwrightiumOptions.setHeadless(true);
-return new PlaywrightiumDriver("http://localhost:4444/wd/hub",chromeOptions);
+playwrightiumOptions.
+
+setConnectionByWS(false);
+playwrightiumOptions.
+
+setHeadless(true);
+return new
+
+PlaywrightiumDriver("http://localhost:4444/wd/hub",chromeOptions);
 ```
 
 > [!IMPORTANT]
@@ -257,9 +329,15 @@ Initialize Playwrightium driver using `PlaywrightiumOptions` class
 
 ```java
 PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
-playwrightiumOptions.setConnectionByWS(true);
-playwrightiumOptions.setHeadless(true);
-return new PlaywrightiumDriver("http://localhost:4444/wd/hub",playwrightiumOptions);
+playwrightiumOptions.
+
+setConnectionByWS(true);
+playwrightiumOptions.
+
+setHeadless(true);
+return new
+
+PlaywrightiumDriver("http://localhost:4444/wd/hub",playwrightiumOptions);
 ```
 
 > [!IMPORTANT]
@@ -287,26 +365,45 @@ Then you should use it with `Configuration`
 E.g.
 
 ```java
-Configuration.browser = PWDriverProvider.class.getName();
+Configuration.browser =PWDriverProvider .class.
+
+getName();
 ```
 
 ## Playwrightium options
 
-| Option name    | Type                                                                                                                                   | Description                                                                                                                                                                          |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| headless       | boolean                                                                                                                                | Run tests in "headless" node or not                                                                                                                                                  |
-| browserName    | string                                                                                                                                 | What browser to run. Available values: chromium, firefox, webkit                                                                                                                     |
-| recordVideo    | boolean                                                                                                                                | Indicates will the video be recorded or not                                                                                                                                          |
-| recordsFolder  | string                                                                                                                                 | The folder where video recordings will be saved. Default {project.basedir}/build/video                                                                                               |
-| connectionByWS | boolean                                                                                                                                | Indicates how we will run tests remotelly. If we will use Selenoid/Selenium grid then we should choose false (works for chrome only), if we will use Moon then we should choose true |
-| emulation      | [Device](src/main/java/org/brit/emulation/Device.java)                                                                                 | Emulates the device                                                                                                                                                                  |
-| locale         | [Locale](https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html)                                                              | Emulates locale                                                                                                                                                                      |
-| timeZone       | [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html)                                                          | Emulates timezone                                                                                                                                                                    |
-| geolocation    | [Geolocation](https://www.javadoc.io/doc/com.microsoft.playwright/playwright/latest/com/microsoft/playwright/options/Geolocation.html) | Emulates geolocation                                                                                                                                                                 |
-| permissions    | List<[Permissions](src/main/java/org/brit/permission/Permissions.java)>                                                                | Switch on permissions                                                                                                                                                                |
+| Option name          | Type                                                                                                                                   | Description                                                                                                                                                                         |
+|----------------------|----------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| headless             | boolean                                                                                                                                | Run tests in "headless" node or not                                                                                                                                                 |
+| browserName          | string  or [Browsers](src/main/java/org/brit/options/Browsers.java)                                                                    | What browser to run. Available values: chromium, firefox, webkit                                                                                                                    |
+| recordVideo          | boolean                                                                                                                                | Indicates will the video be recorded or not                                                                                                                                         |
+| recordsFolder        | string                                                                                                                                 | The folder where video recordings will be saved. Default {project.basedir}/build/video                                                                                              |
+| connectionByWS       | boolean                                                                                                                                | Indicates how we will run tests remotely. If we will use Selenoid/Selenium grid then we should choose false (works for chrome only), if we will use Moon then we should choose true |
+| emulation            | [Device](src/main/java/org/brit/emulation/Device.java)                                                                                 | Emulates the device                                                                                                                                                                 |
+| locale               | [Locale](https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html)                                                              | Emulates locale                                                                                                                                                                     |
+| timeZone             | [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html)                                                          | Emulates timezone                                                                                                                                                                   |
+| geolocation          | [Geolocation](https://www.javadoc.io/doc/com.microsoft.playwright/playwright/latest/com/microsoft/playwright/options/Geolocation.html) | Emulates geolocation                                                                                                                                                                |
+| permissions          | List<[Permissions](src/main/java/org/brit/permission/Permissions.java)>                                                                | Switch on permissions                                                                                                                                                               |
+| enableTracing        | boolean                                                                                                                                | Enables tracing for test run                                                                                                                                                        |
+| tracingOptions       | [TracingOptions](src/main/java/org/brit/options/TracingOptions.java)                                                                   | Sets tracing options when tracing options are enabled                                                                                                                               |
+| skipDownloadBrowsers | boolean                                                                                                                                | Skips downloads of predefined Playwright browsers                                                                                                                                   |
 
 > [!IMPORTANT]
-> For now all this options might be set only by [PlaywrightiumOptions](src/main/java/org/brit/options/PlaywrightiumOptions.java) 
+> For now all this options might be set only
+> by [PlaywrightiumOptions](src/main/java/org/brit/options/PlaywrightiumOptions.java)
+
+## Tracing 
+When tests were run using `enableTracing` option by default `tracing.zip` file should be created in `{projectRootDirectory}/tracing/` directory.  
+To run tracing viewer you can use:
+* `viewTracing.bat` or `viewTracing.sh` scripts depends on you OS. 
+```commandline
+viewTracing.sh path/to/your/tracing.zip
+```
+* run in commandline 
+```commandline
+mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="show-trace path\to\your\trace.zip"
+```
+* or use [Online trace viewer](https://trace.playwright.dev/)
 
 
 And that's all. You can easily use it with Selenide.
