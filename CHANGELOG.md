@@ -5,6 +5,7 @@
 * Add 2 scripts to run tracing viewer
 * Overload `setBrowserName(String browserName)` method with `setBrowserName(Browsers browserName)` 
 in `PlaywrightiumOptions` class. Now you can choose browser using `Browsers` enum
+* Add `skipDownloadBrowser` option
 * Add tests
 * Update documentation
 
