@@ -83,7 +83,8 @@ public class PlaywrightWebElement extends RemoteWebElement {
                         locator.press(keyToPress);
                     }
                 }else {
-                    locator.pressSequentially(charSequence.toString());
+                    locator.pressSequentially(charSequence.toString(),
+                            new Locator.PressSequentiallyOptions().setTimeout(0));
                 }
             }
         }
