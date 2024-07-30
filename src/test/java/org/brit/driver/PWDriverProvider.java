@@ -2,6 +2,7 @@ package org.brit.driver;
 
 import com.codeborne.selenide.WebDriverProvider;
 import com.microsoft.playwright.options.Geolocation;
+import org.brit.options.Browsers;
 import org.brit.options.PlaywrightiumOptions;
 import org.brit.permission.Permissions;
 import org.openqa.selenium.Capabilities;
@@ -20,6 +21,8 @@ public class PWDriverProvider implements WebDriverProvider {
         playwrightiumOptions.setGeolocation(new Geolocation(46.655, 32.617));
         playwrightiumOptions.setPermissions(List.of(Permissions.GEOLOCATION));
         playwrightiumOptions.merge(capabilities);
+        playwrightiumOptions.setBrowserName(Browsers.CHROMIUM);
+        playwrightiumOptions.setEnableTracing(true);
         return new PlaywrightiumDriver(playwrightiumOptions);
     }
 }
