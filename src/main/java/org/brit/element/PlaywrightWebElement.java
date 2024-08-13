@@ -68,6 +68,7 @@ public class PlaywrightWebElement extends RemoteWebElement {
             }
             locator.setInputFiles(Paths.get(toSend.toString()));
         } else {
+            StringBuilder toSend = new StringBuilder();
             for (CharSequence charSequence : keysToSend) {
                 if (charSequence.length() == 1) {
                     if (Keys.getKeyFromUnicode(charSequence.charAt(0)) != null) {
@@ -83,9 +84,9 @@ public class PlaywrightWebElement extends RemoteWebElement {
                         locator.press(keyToPress);
                     }
                 }else {
-                    locator.pressSequentially(charSequence.toString(),
-                            new Locator.PressSequentiallyOptions().setTimeout(0));
+                    toSend.append(charSequence);
                 }
+                locator.fill(toSend.toString());
             }
         }
     }

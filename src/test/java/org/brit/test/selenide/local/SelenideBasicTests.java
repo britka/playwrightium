@@ -6,6 +6,7 @@ import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
 import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDriverProvider;
+import org.brit.driver.PlaywrightiumDriver;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
 import org.openqa.selenium.Alert;
@@ -32,7 +33,7 @@ public class SelenideBasicTests {
     }
 
     @BeforeMethod
-    public void beforeMethod(){
+    public void beforeMethod() {
         Configuration.browser = PWDriverProvider.class.getName();
     }
 
@@ -175,6 +176,13 @@ public class SelenideBasicTests {
         $$(By.xpath("//ul/li")).shouldHave(CollectionCondition.size(elementsCount));
         switchTo().defaultContent();
         $$x("//frame").shouldHave(CollectionCondition.size(5));
+    }
+
+    @Test
+    public void startLocalChrome() {
+        open("https://google.com");
+        assertThat(((PlaywrightiumDriver) webdriver().object()).getOptions().getBrowserName())
+                .isEqualTo("chrome");
     }
 
     @DataProvider
