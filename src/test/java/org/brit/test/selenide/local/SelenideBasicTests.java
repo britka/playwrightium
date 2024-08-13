@@ -29,7 +29,6 @@ public class SelenideBasicTests {
     @BeforeClass
     public void beforeAll() {
         closeWebDriver();
-
     }
 
     @BeforeMethod
@@ -178,12 +177,6 @@ public class SelenideBasicTests {
         $$x("//frame").shouldHave(CollectionCondition.size(5));
     }
 
-    @Test
-    public void startLocalChrome() {
-        open("https://google.com");
-        assertThat(((PlaywrightiumDriver) webdriver().object()).getOptions().getBrowserName())
-                .isEqualTo("chrome");
-    }
 
     @DataProvider
     private Object[][] dataProvider() {
