@@ -16,8 +16,8 @@ public class TracingOptions {
     public TracingOptions() {
         startOptions
                 .setScreenshots(true)
-                .setSnapshots(true)
-                .setSources(true);
+                .setSnapshots(false)
+                .setSources(false);
         stopOptions
                 .setPath(Path.of("tracing/tracing.zip"));
     }

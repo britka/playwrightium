@@ -21,7 +21,6 @@ public class PWDriverProvider implements WebDriverProvider {
         playwrightiumOptions.setGeolocation(new Geolocation(46.655, 32.617));
         playwrightiumOptions.setPermissions(List.of(Permissions.GEOLOCATION));
         playwrightiumOptions.setBrowserName(Browsers.CHROMIUM);
-        playwrightiumOptions.setEnableTracing(true);
         playwrightiumOptions.merge(capabilities);
         return new PlaywrightiumDriver(playwrightiumOptions);
     }

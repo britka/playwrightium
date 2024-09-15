@@ -70,30 +70,31 @@ public class PlaywrightWebElement extends RemoteWebElement {
         } else {
             StringBuilder toSend = new StringBuilder();
             for (CharSequence charSequence : keysToSend) {
-                if (charSequence.length() == 1) {
-                    if (Keys.getKeyFromUnicode(charSequence.charAt(0)) != null) {
-                        var keyToPress = CaseUtils
-                                .toCamelCase(Keys.getKeyFromUnicode(charSequence.charAt(0)).name(), true, ' ');
-                        keyToPress = switch (keyToPress) {
-                            case "Left" -> "ArrowLeft";
-                            case "Up" -> "ArrowUp";
-                            case "Down" -> "ArrowDown";
-                            case "Right" -> "ArrowRight";
-                            default -> keyToPress;
-                        };
-                        locator.press(keyToPress);
-                    }
-                }else {
+                if (charSequence.length() == 1 && Keys.getKeyFromUnicode(charSequence.charAt(0)) != null) {
+                    var keyToPress = CaseUtils
+                            .toCamelCase(Keys.getKeyFromUnicode(
+                                            charSequence.charAt(0)).name(),
+                                    true,
+                                    ' ');
+                    keyToPress = switch (keyToPress) {
+                        case "Left" -> "ArrowLeft";
+                        case "Up" -> "ArrowUp";
+                        case "Down" -> "ArrowDown";
+                        case "Right" -> "ArrowRight";
+                        default -> keyToPress;
+                    };
+                    locator.press(keyToPress);
+                } else {
                     toSend.append(charSequence);
                 }
-                locator.fill(toSend.toString());
             }
+            locator.fill(toSend.toString());
         }
     }
 
     @Override
     public void clear() {
-        locator.clear();
+        locator.clear(new Locator.ClearOptions().setForce(true));
     }
 
     @Override
