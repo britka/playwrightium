@@ -1,8 +1,4 @@
 # Playwrightium
-![Build status](https://github.com/britka/playwrightium/actions/workflows/playwright.yml/badge.svg)
-[![Maven central](https://img.shields.io/maven-central/v/io.github.britka/playwrightium.svg)](https://central.sonatype.com/artifact/io.github.britka/playwrightium)
-[![Telegram channel](https://img.shields.io/badge/Telegram-channel-blue.svg)](https://t.me/playwrightiumProject)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/britka/playwrightium/blob/main/LICENSE)
 
 ## Intro
 
@@ -70,6 +66,17 @@ the [playwrightium tests](src/test/java/org/brit/test/playwrightium/Playwrightiu
 
 After installation your test will run.
 
+> [!NOTE]
+> If you want to skip browsers download you should set up this using `PlaywrightiumOptions` and tell `Playwrightium` to use local browser
+
+Example: 
+```java
+PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
+playwrightiumOptions.setSkipDownloadBrowsers(true);
+playwrightiumOptions.setBrowserName(Browsers.CHROME_CHANNEL);
+PlaywrightiumDriver playwrightiumDriver = new PlaywrightiumDriver(playwrightiumOptions);
+```
+
 ## What Playwrightium can do
 
 ### Navigate to url
@@ -129,6 +136,11 @@ element.click();
 element.isDisplayed();
 element.getText();
 ```
+> [!IMPORTANT]
+> Method `sendKeys` works quickly amd smooth. But Selenide method `setValue` can work slowly. 
+> This method makes many things.
+> So if it is possible use `sendKey` from Playwrightium 
+
 
 ### Switch to frame
 
@@ -147,7 +159,8 @@ String selectValue = select.getFirstSelectedOption().getAttribute("value");
 * Use waiters
 
 ```java
- new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(.,'Processed Form Details')]")));
+ new WebDriverWait(driver, Duration.ofSeconds(10)).
+    until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(.,'Processed Form Details')]")));
 ```
 
 ### Use alerts
@@ -192,7 +205,8 @@ Initialize Playwrightium driver using `PlaywrightiumOptions` class
 ```java
 PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
 playwrightiumOptions.setRecordVideo(true);
-driver = new PlaywrightiumDriver(playwrightiumOptions);
+
+driver =new PlaywrightiumDriver(playwrightiumOptions);
 ```
 
 > [!IMPORTANT]
@@ -204,7 +218,7 @@ or to initialize records folder
 PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
 playwrightiumOptions.setRecordVideo(true);
 playwrightiumOptions.setRecordsFolder(Path.of("videosFolder"));
-driver = new PlaywrightiumDriver(playwrightiumOptions);
+driver =new PlaywrightiumDriver(playwrightiumOptions);
 ```
 
 > [!IMPORTANT]
@@ -296,22 +310,41 @@ Configuration.browser = PWDriverProvider.class.getName();
 
 ## Playwrightium options
 
-| Option name    | Type                                                                                                                                   | Description                                                                                                                                                                          |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| headless       | boolean                                                                                                                                | Run tests in "headless" node or not                                                                                                                                                  |
-| browserName    | string                                                                                                                                 | What browser to run. Available values: chromium, firefox, webkit                                                                                                                     |
-| recordVideo    | boolean                                                                                                                                | Indicates will the video be recorded or not                                                                                                                                          |
-| recordsFolder  | string                                                                                                                                 | The folder where video recordings will be saved. Default {project.basedir}/build/video                                                                                               |
-| connectionByWS | boolean                                                                                                                                | Indicates how we will run tests remotelly. If we will use Selenoid/Selenium grid then we should choose false (works for chrome only), if we will use Moon then we should choose true |
-| emulation      | [Device](src/main/java/org/brit/emulation/Device.java)                                                                                 | Emulates the device                                                                                                                                                                  |
-| locale         | [Locale](https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html)                                                              | Emulates locale                                                                                                                                                                      |
-| timeZone       | [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html)                                                          | Emulates timezone                                                                                                                                                                    |
-| geolocation    | [Geolocation](https://www.javadoc.io/doc/com.microsoft.playwright/playwright/latest/com/microsoft/playwright/options/Geolocation.html) | Emulates geolocation                                                                                                                                                                 |
-| permissions    | List<[Permissions](src/main/java/org/brit/permission/Permissions.java)>                                                                | Switch on permissions                                                                                                                                                                |
+| Option name          | Type                                                                                                                                   | Description                                                                                                                                                                         |
+|----------------------|----------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| headless             | boolean                                                                                                                                | Run tests in "headless" node or not                                                                                                                                                 |
+| browserName          | string  or [Browsers](src/main/java/org/brit/options/Browsers.java)                                                                    | What browser to run. Available values: chromium, firefox, webkit                                                                                                                    |
+| recordVideo          | boolean                                                                                                                                | Indicates will the video be recorded or not                                                                                                                                         |
+| recordsFolder        | string                                                                                                                                 | The folder where video recordings will be saved. Default {project.basedir}/build/video                                                                                              |
+| connectionByWS       | boolean                                                                                                                                | Indicates how we will run tests remotely. If we will use Selenoid/Selenium grid then we should choose false (works for chrome only), if we will use Moon then we should choose true |
+| emulation            | [Device](src/main/java/org/brit/emulation/Device.java)                                                                                 | Emulates the device                                                                                                                                                                 |
+| locale               | [Locale](https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html)                                                              | Emulates locale                                                                                                                                                                     |
+| timeZone             | [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html)                                                          | Emulates timezone                                                                                                                                                                   |
+| geolocation          | [Geolocation](https://www.javadoc.io/doc/com.microsoft.playwright/playwright/latest/com/microsoft/playwright/options/Geolocation.html) | Emulates geolocation                                                                                                                                                                |
+| permissions          | List<[Permissions](src/main/java/org/brit/permission/Permissions.java)>                                                                | Switch on permissions                                                                                                                                                               |
+| enableTracing        | boolean                                                                                                                                | Enables tracing for test run                                                                                                                                                        |
+| tracingOptions       | [TracingOptions](src/main/java/org/brit/options/TracingOptions.java)                                                                   | Sets tracing options when tracing options are enabled                                                                                                                               |
+| skipDownloadBrowsers | boolean                                                                                                                                | Skips downloads of predefined Playwright browsers                                                                                                                                   |
 
 > [!IMPORTANT]
-> For now all this options might be set only by [PlaywrightiumOptions](src/main/java/org/brit/options/PlaywrightiumOptions.java) 
+> For now all this options might be set only
+> by [PlaywrightiumOptions](src/main/java/org/brit/options/PlaywrightiumOptions.java)
 
+## Tracing 
+When tests were run using `enableTracing` option by default `tracing.zip` file should be created in `{projectRootDirectory}/tracing/` directory.  
+To run tracing viewer you can use:
+* `viewTracing.bat` or `viewTracing.sh` scripts depends on you OS. 
+```commandline
+viewTracing.sh path/to/your/tracing.zip
+```
+* run in commandline 
+```commandline
+mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="show-trace path\to\your\trace.zip"
+```
+* or use [Online trace viewer](https://trace.playwright.dev/)
+
+> [!IMPORTANT]  
+> Be careful!!! This may decrease the speed of test running
 
 And that's all. You can easily use it with Selenide.
 See [test for Selenide](src/test/java/org/brit/test/selenide/)

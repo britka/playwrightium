@@ -1,10 +1,22 @@
 # Changelog
+
+## 1.4.0
+* Add tracing recording feature
+* Add 2 scripts to run tracing viewer
+* Overload `setBrowserName(String browserName)` method with `setBrowserName(Browsers browserName)` 
+in `PlaywrightiumOptions` class. Now you can choose browser using `Browsers` enum
+* Add `skipDownloadBrowser` option
+* Update `sendKeys` method
+* Add tests
+* Update documentation
+
 ## 1.3.0
 * Geolocation added
 * Device emulation added
 * Permissions added
 * Locale added
 * TimeZone added
+* Tests updated
 
 ## 1.2.1 (release 28.03.24)
 * Update `sendKeys` method. Now you can do such things as  

@@ -1,14 +1,12 @@
 package org.brit.options;
 
 import com.microsoft.playwright.options.Geolocation;
-import org.apache.commons.lang3.LocaleUtils;
 import org.brit.emulation.Device;
 import org.brit.permission.Permissions;
 import org.openqa.selenium.MutableCapabilities;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -26,6 +24,7 @@ public class PlaywrightiumOptions extends MutableCapabilities {
         setHeadless(false);
         setBrowserName("chromium");
         setRecordsFolder(Paths.get("build/video"));
+        setSkipDownloadBrowsers(false);
     }
 
     /**
@@ -47,6 +46,10 @@ public class PlaywrightiumOptions extends MutableCapabilities {
      */
     public void setBrowserName(String browserName) {
         setCapability("browserName", browserName);
+    }
+
+    public void setBrowserName(Browsers browserName){
+        setCapability("browserName", browserName.getValue());
     }
 
     /**
@@ -130,4 +133,29 @@ public class PlaywrightiumOptions extends MutableCapabilities {
     public List<Permissions> getPermissions(){
         return (List<Permissions>) getCapability("permissions");
     }
+
+    public void setEnableTracing(Boolean enableTracing){
+        setCapability("enableTracing", enableTracing);
+    }
+
+    public Boolean getEnableTracing(){
+       return (Boolean) getCapability("enableTracing");
+    }
+
+    public void setTracingOptions(TracingOptions tracingOptions){
+        setCapability("tracingOptions", tracingOptions);
+    }
+
+    public TracingOptions getTracingOptions(){
+        return (TracingOptions) getCapability("tracingOptions");
+    }
+
+    public void setSkipDownloadBrowsers(Boolean doNotDownloadBrowsers){
+        setCapability("skipDownloadBrowsers", doNotDownloadBrowsers);
+    }
+
+    public Boolean getSkipDownloadBrowsers(){
+        return (Boolean) getCapability("skipDownloadBrowsers");
+    }
+
 }

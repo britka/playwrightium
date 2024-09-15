@@ -12,7 +12,9 @@ import org.apache.commons.text.CaseUtils;
 import org.brit.element.PlaywrightWebElement;
 import org.brit.emulation.Device;
 import org.brit.locators.ArialSearchOptions;
+import org.brit.options.Browsers;
 import org.brit.options.PlaywrightiumOptions;
+import org.brit.options.TracingOptions;
 import org.brit.permission.Permissions;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Interactive;
@@ -50,8 +52,16 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     }
 
     public PlaywrightiumDriver(PlaywrightiumOptions options) {
-        playwright = Playwright.create();
         this.options = options;
+
+        Boolean doNotDownloadBrowsers = this.options.getSkipDownloadBrowsers();
+
+        if (doNotDownloadBrowsers != null && doNotDownloadBrowsers) {
+            playwright = Playwright.create(new Playwright.CreateOptions().setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
+        } else {
+            playwright = Playwright.create();
+        }
+
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
         Boolean headless = (Boolean) this.options.getCapability("headless");
         launchOptions.setHeadless(headless).setDownloadsPath(Paths.get("downloads"));
@@ -62,6 +72,9 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         TimeZone timeZone = this.options.getTimeZone();
         Geolocation geolocation = this.options.getGeolocation();
         List<Permissions> permissions = this.options.getPermissions();
+        Boolean enableTracing = this.options.getEnableTracing();
+        TracingOptions tracingOptions = this.options.getTracingOptions();
+
 
         Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
         boolean recordVideo = this.options.getRecordVideo() != null && options.getRecordVideo();
@@ -74,18 +87,23 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
             }
         }
 
-        if (locale != null){
+        if (locale != null) {
             newContextOptions.setLocale(locale.toLanguageTag());
         }
-        if (timeZone != null){
+        if (timeZone != null) {
             newContextOptions.setTimezoneId(timeZone.getID());
         }
-        if (geolocation != null){
+        if (geolocation != null) {
             newContextOptions.setGeolocation(geolocation);
         }
-        if (permissions != null){
+        if (permissions != null) {
             newContextOptions.setPermissions(permissions.stream().map(Permissions::getValue).toList());
         }
+
+        if (Browsers.channelBrowsers.contains(browserType)) {
+            launchOptions.setChannel(browserType);
+        }
+
 
         if (device != null) {
             newContextOptions
@@ -104,13 +122,20 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
                     .newContext(newContextOptions);
         }
 
+        if (enableTracing != null && enableTracing) {
+            if (tracingOptions == null) {
+                browserContext.tracing().start(new TracingOptions().getStartOptions());
+            } else {
+                browserContext.tracing().start(tracingOptions.getStartOptions());
+            }
+        }
         page = browserContext.newPage();
     }
 
 
     private BrowserType getBrowserType(String browser) {
         switch (browser) {
-            case "chromium" -> {
+            case "chromium", "chrome", "msedge", "chrome-beta", "msedge-beta", "msedge-dev" -> {
                 return playwright.chromium();
             }
             case "firefox" -> {
@@ -253,10 +278,6 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         }
     }
 
-    public static void main(String[] args) {
-        Page.GetByRoleOptions getByRoleOptions = new Page.GetByRoleOptions();
-    }
-
     private Page.GetByRoleOptions convertOption(ArialSearchOptions arialSearchOptions) {
         Object name = arialSearchOptions.getName();
         Page.GetByRoleOptions getByRoleOptions = new Page.GetByRoleOptions();
@@ -310,6 +331,14 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         saveVideoIfNeeded();
         if (!page.isClosed()) {
             page.close();
+        }
+        if (this.options.getEnableTracing() != null && this.options.getEnableTracing()) {
+            TracingOptions tracingOptions = this.options.getTracingOptions();
+            if (tracingOptions == null) {
+                browserContext.tracing().stop(new TracingOptions().getStopOptions());
+            } else {
+                browserContext.tracing().stop(this.options.getTracingOptions().getStopOptions());
+            }
         }
         browserContext.close();
         playwright.close();

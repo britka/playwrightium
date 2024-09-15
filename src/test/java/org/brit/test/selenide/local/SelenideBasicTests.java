@@ -6,6 +6,7 @@ import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
 import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDriverProvider;
+import org.brit.driver.PlaywrightiumDriver;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
 import org.openqa.selenium.Alert;
@@ -28,11 +29,10 @@ public class SelenideBasicTests {
     @BeforeClass
     public void beforeAll() {
         closeWebDriver();
-
     }
 
     @BeforeMethod
-    public void beforeMethod(){
+    public void beforeMethod() {
         Configuration.browser = PWDriverProvider.class.getName();
     }
 
@@ -176,6 +176,7 @@ public class SelenideBasicTests {
         switchTo().defaultContent();
         $$x("//frame").shouldHave(CollectionCondition.size(5));
     }
+
 
     @DataProvider
     private Object[][] dataProvider() {

@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.codeborne.selenide.Selenide.$$;
 import static com.codeborne.selenide.Selenide.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -247,6 +248,9 @@ public class PlaywrightiumBasicTests {
         driver.get("https://google.com");
         WebElement element = driver.findElement(By.name("q"));
         element.sendKeys("Playwright.", "dev", Keys.ENTER);
+        List<WebElement> until = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#rso div.g a>h3"), 8));
+        assertThat(until.stream().map(WebElement::getText).toList()).allMatch(s -> s.toLowerCase().contains("playwright"));
     }
 
     private Object[][] dataProvider() {
