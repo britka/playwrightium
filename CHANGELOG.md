@@ -6,6 +6,7 @@
 * Overload `setBrowserName(String browserName)` method with `setBrowserName(Browsers browserName)` 
 in `PlaywrightiumOptions` class. Now you can choose browser using `Browsers` enum
 * Add `skipDownloadBrowser` option
+* Update `sendKeys` method
 * Add tests
 * Update documentation
 

@@ -136,6 +136,11 @@ element.click();
 element.isDisplayed();
 element.getText();
 ```
+> [!IMPORTANT]
+> Method `sendKeys` works quickly amd smooth. But Selenide method `setValue` can work slowly. 
+> This method makes many things.
+> So if it is possible use `sendKey` from Playwrightium 
+
 
 ### Switch to frame
 
@@ -338,6 +343,8 @@ mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="sh
 ```
 * or use [Online trace viewer](https://trace.playwright.dev/)
 
+> [!IMPORTANT]  
+> Be careful!!! This may decrease the speed of test running
 
 And that's all. You can easily use it with Selenide.
 See [test for Selenide](src/test/java/org/brit/test/selenide/)
