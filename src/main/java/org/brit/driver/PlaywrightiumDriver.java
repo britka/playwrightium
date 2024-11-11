@@ -686,12 +686,14 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public Timeouts pageLoadTimeout(long time, TimeUnit unit) {
-            return null;
+            page.setDefaultNavigationTimeout(Duration.of(time, unit.toChronoUnit()).toMillis());
+            return this;
         }
 
         @Override
         public Timeouts pageLoadTimeout(Duration duration) {
-            return Timeouts.super.pageLoadTimeout(duration);
+            page.setDefaultNavigationTimeout(duration.toMillis());
+            return this;
         }
 
         @Override
