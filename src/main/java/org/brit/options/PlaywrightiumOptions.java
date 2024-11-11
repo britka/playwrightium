@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static org.openqa.selenium.remote.CapabilityType.ACCEPT_INSECURE_CERTS;
+
 /**
  * @author Serhii Bryt
  * This is Option class for Playwrightium
@@ -22,6 +24,7 @@ public class PlaywrightiumOptions extends MutableCapabilities {
     public PlaywrightiumOptions() {
         super();
         setHeadless(false);
+        setIgnoreHTTPSErrors(false);
         setBrowserName("chromium");
         setRecordsFolder(Paths.get("build/video"));
         setSkipDownloadBrowsers(false);
@@ -37,6 +40,18 @@ public class PlaywrightiumOptions extends MutableCapabilities {
 
     public Boolean getHeadless() {
         return (Boolean) getCapability("headless");
+    }
+
+    /**
+     * Sets setIgnoreHTTPSErrors mode
+     * @param value
+     */
+    public void setIgnoreHTTPSErrors(boolean value) {
+        setCapability(ACCEPT_INSECURE_CERTS, value);
+    }
+
+    public Boolean getIgnoreHTTPSErrors() {
+        return (Boolean) getCapability(ACCEPT_INSECURE_CERTS);
     }
 
     /**
