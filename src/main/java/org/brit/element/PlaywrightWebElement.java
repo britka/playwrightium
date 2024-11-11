@@ -99,17 +99,19 @@ public class PlaywrightWebElement extends RemoteWebElement {
 
     @Override
     public String getTagName() {
-        return locator.evaluate("node => node.tagName").toString();
+        return String.valueOf(locator.evaluate("node => node.tagName")).toLowerCase();
     }
 
     @Override
     public String getAttribute(String name) {
         // sometimes relative href attribute is returned without leading /
-        if (name.equals("href"))
-            return locator.evaluate("node => node.href").toString();
+        if (name.equals("href")) {
+            return String.valueOf(locator.evaluate("node => node.href"));
+        }
         String attributeValue = locator.getAttribute(name);
         if (attributeValue == null) {
-            attributeValue = (String) locator.evaluate("node => node.%s".formatted(name));
+            Object jsAttribute = locator.evaluate("node => node['%s']".formatted(name));
+            return jsAttribute != null ? jsAttribute.toString() : null;
         }
         return attributeValue;
     }
