@@ -4,6 +4,7 @@ import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.BoundingBox;
 import org.apache.commons.text.CaseUtils;
+import org.brit.element.adapters.GetAttributeAdapter;
 import org.brit.locators.ArialSearchOptions;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -104,16 +105,7 @@ public class PlaywrightWebElement extends RemoteWebElement {
 
     @Override
     public String getAttribute(String name) {
-        // sometimes relative href attribute is returned without leading /
-        if (name.equals("href")) {
-            return String.valueOf(locator.evaluate("node => node.href"));
-        }
-        String attributeValue = locator.getAttribute(name);
-        if (attributeValue == null) {
-            Object jsAttribute = locator.evaluate("node => node['%s']".formatted(name));
-            return jsAttribute != null ? jsAttribute.toString() : null;
-        }
-        return attributeValue;
+        return GetAttributeAdapter.getAttribute(locator, name);
     }
 
     @Override
@@ -286,7 +278,12 @@ public class PlaywrightWebElement extends RemoteWebElement {
 
     @Override
     public String getDomAttribute(String name) {
-        return locator.getAttribute(name);
+        return GetAttributeAdapter.getDomAttribute(locator, name);
+    }
+
+    @Override
+    public String getDomProperty(String name) {
+        return GetAttributeAdapter.getDomProperty(locator, name);
     }
 
 }
