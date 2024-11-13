@@ -17,6 +17,7 @@ import org.brit.options.PlaywrightiumOptions;
 import org.brit.options.TracingOptions;
 import org.brit.permission.Permissions;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.logging.Logs;
@@ -34,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.microsoft.playwright.options.WaitForSelectorState.ATTACHED;
+
 public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
     private Playwright playwright;
     private BrowserContext browserContext;
@@ -43,7 +46,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     private Page activePage;
 
     private Frame mainFrameCopy = null;
-
+    private static final Locator.WaitForOptions elementExists = new Locator.WaitForOptions().setState(ATTACHED);
     private PlaywrightiumOptions options;
 
 
@@ -228,7 +231,12 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public WebElement findElement(By by) {
-        return new PlaywrightWebElement(getLocatorFromBy(by).first());
+      try {
+        getLocatorFromBy(by).first().waitFor(elementExists);
+      } catch (TimeoutError e) {
+        throw new NoSuchElementException("Unable to locate element: " + by, e);
+      }
+      return new PlaywrightWebElement(getLocatorFromBy(by).first());
     }
 
     private Locator getLocatorFromBy(By by) {

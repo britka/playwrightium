@@ -17,6 +17,8 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.microsoft.playwright.options.WaitForSelectorState.ATTACHED;
+
 /**
  * @author Serhii Bryt
  * WebElement implementation
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
  */
 public class PlaywrightWebElement extends RemoteWebElement {
 
+    private static final Locator.WaitForOptions elementExists = new Locator.WaitForOptions().setState(ATTACHED);
     Locator locator;
     ElementHandle elementHandle;
 
@@ -138,6 +141,11 @@ public class PlaywrightWebElement extends RemoteWebElement {
 
     @Override
     public WebElement findElement(By by) {
+        try {
+            getLocatorFromBy(by).first().waitFor(elementExists);
+        } catch (TimeoutError e) {
+            throw new NoSuchElementException("Unable to locate element: " + by, e);
+        }
         return new PlaywrightWebElement(getLocatorFromBy(by).first());
     }
 
