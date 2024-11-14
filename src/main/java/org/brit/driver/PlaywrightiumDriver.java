@@ -9,6 +9,7 @@ import com.microsoft.playwright.options.ViewportSize;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.text.CaseUtils;
+import org.brit.driver.adapters.FindElementAdapter;
 import org.brit.element.PlaywrightWebElement;
 import org.brit.emulation.Device;
 import org.brit.locators.ArialSearchOptions;
@@ -218,19 +219,12 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public List<WebElement> findElements(By by) {
-        return getLocatorFromBy(by).all()
-                .stream().map(PlaywrightWebElement::new)
-                .collect(Collectors.toUnmodifiableList());
+        return FindElementAdapter.findElements(getLocatorFromBy(by));
     }
 
     @Override
     public WebElement findElement(By by) {
-      try {
-        getLocatorFromBy(by).first().waitFor(elementExists);
-      } catch (TimeoutError e) {
-        throw new NoSuchElementException("Unable to locate element: " + by, e);
-      }
-      return new PlaywrightWebElement(getLocatorFromBy(by).first());
+        return FindElementAdapter.findElement(getLocatorFromBy(by), by);
     }
 
     private Locator getLocatorFromBy(By by) {
