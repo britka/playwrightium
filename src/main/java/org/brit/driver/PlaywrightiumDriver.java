@@ -672,13 +672,16 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public Timeouts implicitlyWait(long time, TimeUnit unit) {
-            page.setDefaultTimeout(Duration.of(time, unit.toChronoUnit()).toMillis());
+            long millis = Duration.of(time, unit.toChronoUnit()).toMillis();
+            page.setDefaultTimeout(millis);
+            page.context().setDefaultTimeout(millis);
             return this;
         }
 
         @Override
         public Timeouts implicitlyWait(Duration duration) {
             page.setDefaultTimeout(duration.toMillis());
+            page.context().setDefaultTimeout(duration.toMillis());
             return this;
         }
 
@@ -709,13 +712,16 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public Timeouts pageLoadTimeout(long time, TimeUnit unit) {
-            page.setDefaultNavigationTimeout(Duration.of(time, unit.toChronoUnit()).toMillis());
+            long millis = Duration.of(time, unit.toChronoUnit()).toMillis();
+            page.setDefaultNavigationTimeout(millis);
+            page.context().setDefaultNavigationTimeout(millis);
             return this;
         }
 
         @Override
         public Timeouts pageLoadTimeout(Duration duration) {
             page.setDefaultNavigationTimeout(duration.toMillis());
+            page.context().setDefaultNavigationTimeout(duration.toMillis());
             return this;
         }
 
