@@ -21,6 +21,7 @@ import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.logging.Logs;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.UnreachableBrowserException;
 
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -210,7 +211,12 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public String getTitle() {
-        return page.title();
+        // Selenide uses getTitle() to check if the browser is alive, so it will be nice to properly re-throw the expected exception.
+        try {
+            return page.title();
+        } catch (PlaywrightException e) {
+            throw new UnreachableBrowserException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -364,14 +370,11 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         }
         List<Page> pages = PlaywrightiumDriver.this.page.context().pages();
         for (Page pageTemp : pages) {
-            Field guid = null;
             try {
-                guid = pageTemp.getClass().getSuperclass().getDeclaredField("guid");
+                Field guid = pageTemp.getClass().getSuperclass().getDeclaredField("guid");
                 guid.setAccessible(true);
                 handles.add(guid.get(pageTemp).toString());
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -549,25 +552,42 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public WebDriver frame(int index) {
-            Frame frame = page.frames().get(index);
+            Frame frame;
+            try {
+                frame = page.frames().get(index);
+            } catch (IndexOutOfBoundsException | TimeoutError e) {
+                throw new NoSuchFrameException("No frame at index " + index);
+            }
             setMainFrame(frame);
             return PlaywrightiumDriver.this;
         }
 
         @Override
         public WebDriver frame(String nameOrId) {
-            Locator frameLocator = page.locator("[name='%s'], #%s".formatted(nameOrId, nameOrId));
-            Frame frame = page.frame(frameLocator.getAttribute("name"));
+            Frame frame;
+            try {
+                Locator frameLocator = page.locator("[name='%s'], #%s".formatted(nameOrId, nameOrId));
+                frame = page.frame(frameLocator.getAttribute("name"));
+            } catch (TimeoutError e) {
+                throw new NoSuchFrameException(nameOrId);
+            }
             setMainFrame(frame);
             return PlaywrightiumDriver.this;
         }
 
         @Override
         public WebDriver frame(WebElement frameElement) {
-            PlaywrightWebElement element = (PlaywrightWebElement) frameElement;
-            String nameOrId = element.getLocator().getAttribute("id");
-            if (nameOrId == null) {
-                nameOrId = element.getLocator().getAttribute("name");
+            String nameOrId;
+            try {
+                nameOrId = frameElement.getAttribute("id");
+                if (nameOrId == null || nameOrId.isEmpty()) {
+                    nameOrId = frameElement.getAttribute("name");
+                }
+            } catch (TimeoutError e) {
+                throw new NoSuchFrameException(frameElement.toString(), e);
+            }
+            if (nameOrId == null || nameOrId.isEmpty() ) {
+                throw new NoSuchFrameException(frameElement.toString());
             }
             return frame(nameOrId);
         }
@@ -602,12 +622,14 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
                     if (guid.get(pageElement).toString().equals(nameOrHandle) || nameOrHandle.equals(evaluate)) {
                         pageElement.bringToFront();
                         PlaywrightiumDriver.this.page = pageElement;
+                        return PlaywrightiumDriver.this;
                     }
+
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             }
-            return PlaywrightiumDriver.this;
+            throw new NoSuchWindowException("No such window: " + nameOrHandle);
         }
 
         @Override
