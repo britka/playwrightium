@@ -4,6 +4,7 @@ import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.BoundingBox;
 import org.apache.commons.text.CaseUtils;
+import org.brit.driver.adapters.FindElementAdapter;
 import org.brit.locators.ArialSearchOptions;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -15,7 +16,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author Serhii Bryt
@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
  * @see org.openqa.selenium.WebElement
  */
 public class PlaywrightWebElement extends RemoteWebElement {
-
     Locator locator;
     ElementHandle elementHandle;
 
@@ -131,14 +130,12 @@ public class PlaywrightWebElement extends RemoteWebElement {
 
     @Override
     public List<WebElement> findElements(By by) {
-        return getLocatorFromBy(by).all()
-                .stream().map(PlaywrightWebElement::new)
-                .collect(Collectors.toUnmodifiableList());
+        return FindElementAdapter.findElements(getLocatorFromBy(by));
     }
 
     @Override
     public WebElement findElement(By by) {
-        return new PlaywrightWebElement(getLocatorFromBy(by).first());
+        return FindElementAdapter.findElement(getLocatorFromBy(by), by);
     }
 
     private Locator getLocatorFromBy(By by) {

@@ -9,6 +9,7 @@ import com.microsoft.playwright.options.ViewportSize;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.text.CaseUtils;
+import org.brit.driver.adapters.FindElementAdapter;
 import org.brit.element.PlaywrightWebElement;
 import org.brit.emulation.Device;
 import org.brit.locators.ArialSearchOptions;
@@ -17,6 +18,7 @@ import org.brit.options.PlaywrightiumOptions;
 import org.brit.options.TracingOptions;
 import org.brit.permission.Permissions;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.logging.Logs;
@@ -33,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.microsoft.playwright.options.WaitForSelectorState.ATTACHED;
+
 public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
     private Playwright playwright;
     private BrowserContext browserContext;
@@ -42,7 +46,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     private Page activePage;
 
     private Frame mainFrameCopy = null;
-
+    private static final Locator.WaitForOptions elementExists = new Locator.WaitForOptions().setState(ATTACHED);
     private PlaywrightiumOptions options;
 
 
@@ -215,14 +219,12 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public List<WebElement> findElements(By by) {
-        return getLocatorFromBy(by).all()
-                .stream().map(PlaywrightWebElement::new)
-                .collect(Collectors.toUnmodifiableList());
+        return FindElementAdapter.findElements(getLocatorFromBy(by));
     }
 
     @Override
     public WebElement findElement(By by) {
-        return new PlaywrightWebElement(getLocatorFromBy(by).first());
+        return FindElementAdapter.findElement(getLocatorFromBy(by), by);
     }
 
     private Locator getLocatorFromBy(By by) {
