@@ -75,8 +75,8 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         Boolean enableTracing = this.options.getEnableTracing();
         TracingOptions tracingOptions = this.options.getTracingOptions();
 
-
         Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
+        newContextOptions.setIgnoreHTTPSErrors(options.getIgnoreHTTPSErrors());
         boolean recordVideo = this.options.getRecordVideo() != null && options.getRecordVideo();
 
         if (recordVideo) {
@@ -164,7 +164,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
         boolean recordVideo = options.getRecordVideo() != null && options.getRecordVideo();
-
+        newContextOptions.setIgnoreHTTPSErrors(options.getIgnoreHTTPSErrors());
 
         if (recordVideo) {
             if (options.getRecordsFolder() == null) {
