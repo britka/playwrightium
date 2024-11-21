@@ -1,6 +1,5 @@
 package org.brit.driver;
 
-import com.codeborne.selenide.impl.WebElementSource;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.Geolocation;
@@ -9,6 +8,7 @@ import com.microsoft.playwright.options.ViewportSize;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.text.CaseUtils;
+import org.brit.driver.adapters.JsExecutionAdapter;
 import org.brit.element.PlaywrightWebElement;
 import org.brit.emulation.Device;
 import org.brit.locators.ArialSearchOptions;
@@ -44,7 +44,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     private Frame mainFrameCopy = null;
 
     private PlaywrightiumOptions options;
-
+    private final static JsExecutionAdapter jsExecutionAdapter = new JsExecutionAdapter();
 
     @SneakyThrows
     public PlaywrightiumDriver() {
@@ -632,8 +632,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public WebElement activeElement() {
-            ElementHandle element = page.evaluateHandle("() => document.activeElement").asElement();
-            return getPlaywrightElement(element);
+            return (WebElement) PlaywrightiumDriver.this.executeScript("() => document.activeElement");
         }
 
         @Override
@@ -876,107 +875,12 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public Object executeScript(String script, Object... args) {
-        script = script.trim().startsWith("return") ? script.replaceFirst("return", "") : script;
-        if (args.length > 0) {
-            var arguments = transformArguments(args);
-            JSHandle jsHandle = page.evaluateHandle("(arguments) => " + script, arguments);
-            if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof HTMLCollection").toString())) {
-                int length = (int) page.evaluate("node => node.length", jsHandle);
-                List<PlaywrightWebElement> list = new ArrayList<>();
-                for (int i = 0; i < length; i++) {
-                    list.add(getPlaywrightElement(page.evaluateHandle("node => node.item(%s)".formatted(i), jsHandle).asElement()));
-                }
-                return list;
-            } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof HTMLElement").toString())) {
-                return getPlaywrightElement(jsHandle.asElement());
-            } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof Array").toString())) {
-                int length = (int) page.evaluate("node => node.length", jsHandle);
-                List<String> list = new ArrayList<>();
-                for (int i = 0; i < length; i++) {
-                    Object evaluate = page.evaluate("node => node[%s]".formatted(i), jsHandle);
-                    list.add(evaluate != null ? evaluate.toString() : null);
-                }
-                return list;
-            } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof Object").toString())) {
-                return jsHandle.jsonValue();
-            } else {
-                return jsHandle.toString();
-            }
-        } else {
-            return page.evaluate(script);
-        }
-        // return Map.of();
-    }
-
-    private List<Object> transformArguments(Object... args) {
-        List<Object> result = new LinkedList<>();
-        for (Object arg : args) {
-            ElementHandle elementHandle = null;
-            if (arg instanceof WebElementSource) {
-                elementHandle = ((PlaywrightWebElement) (((WebElementSource) arg).getWebElement())).getLocator().elementHandle();
-            } else if (arg instanceof WrapsElement) {
-                elementHandle = ((PlaywrightWebElement) (((WrapsElement) arg).getWrappedElement())).getElementHandle();
-            } else if (arg instanceof WebElement) {
-                Locator locator = ((PlaywrightWebElement) arg).getLocator();
-                elementHandle = locator.elementHandle();
-            } else if (arg instanceof Collection<?>) {
-                ArrayList<Object> arrayList = new ArrayList<>((Collection<?>) arg);
-                if (!arrayList.isEmpty() && arrayList.get(0) instanceof WebElement) {
-                    List<ElementHandle> list = arrayList.stream().map(e -> {
-                        Locator locator = ((PlaywrightWebElement) e).getLocator();
-                        return locator.elementHandle();
-                    }).toList();
-                    result.add(list);
-                    continue;
-                }
-            }
-            if (elementHandle != null) {
-                result.add(elementHandle);
-            } else {
-                if (arg instanceof Collection<?>) {
-                    ArrayList<Object> objects = new ArrayList<>((Collection<?>) arg);
-                    result.add(objects);
-                } else {
-                    result.add(arg);
-                }
-            }
-        }
-        return result;
+        return jsExecutionAdapter.executeScript(page, script, args);
     }
 
     @Override
     public Object executeAsyncScript(String script, Object... args) {
-        if (args.length > 0) {
-            return page.evaluate("async () => {" + script.replace("return", "") + "}", transformArguments(args));
-        } else {
-            return page.evaluate("async () => {" + script.replace("return", "") + "}");
-        }
-    }
-
-
-    public PlaywrightWebElement getPlaywrightElement(ElementHandle node) {
-        String string = page.evaluate("""
-                node =>
-                {
-                    names = [];                
-                    do {
-                        index = 0;
-                        cursorElement = node;
-                        while (cursorElement !== null) {
-                            ++index;
-                            cursorElement = cursorElement.previousElementSibling;
-                        }
-                        names.unshift(node.tagName + ":nth-child(" + index + ")");
-                        node = node.parentElement;
-                    } while (node !== null);
-                                
-                    return names.join(" > ");
-                }
-                """, node).toString();
-
-        Locator locator = page.locator(string);
-        return new PlaywrightWebElement(locator);
-
+        return jsExecutionAdapter.executeAsyncScript(page, script, args);
     }
 
     public PlaywrightiumOptions getOptions() {
