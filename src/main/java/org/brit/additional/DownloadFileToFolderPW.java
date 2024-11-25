@@ -10,7 +10,6 @@ import com.microsoft.playwright.Page;
 import org.brit.element.PlaywrightWebElement;
 import org.openqa.selenium.WebElement;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
@@ -27,7 +26,6 @@ public class DownloadFileToFolderPW extends DownloadFileToFolder {
         super();
     }
 
-    @Nonnull
     @Override
     public File download(WebElementSource anyClickableElement, WebElement clickable, long timeout, long incrementTimeout, FileFilter fileFilter, DownloadAction action) {
         try {
