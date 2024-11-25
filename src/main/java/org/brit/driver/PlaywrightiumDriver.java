@@ -7,7 +7,6 @@ import com.microsoft.playwright.options.Geolocation;
 import com.microsoft.playwright.options.MouseButton;
 import com.microsoft.playwright.options.ViewportSize;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import org.apache.commons.text.CaseUtils;
 import org.brit.element.PlaywrightWebElement;
 import org.brit.emulation.Device;
@@ -16,6 +15,7 @@ import org.brit.options.Browsers;
 import org.brit.options.PlaywrightiumOptions;
 import org.brit.options.TracingOptions;
 import org.brit.permission.Permissions;
+import org.jspecify.annotations.Nullable;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
@@ -33,20 +33,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNullElseGet;
+
 public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
-    private Playwright playwright;
-    private BrowserContext browserContext;
+    private final Playwright playwright;
+    private final BrowserContext browserContext;
     @Getter
     protected Page page;
 
-    private Page activePage;
-
+    @Nullable
     private Frame mainFrameCopy = null;
 
-    private PlaywrightiumOptions options;
+    private final PlaywrightiumOptions options;
 
-
-    @SneakyThrows
     public PlaywrightiumDriver() {
         this(new PlaywrightiumOptions());
     }
@@ -80,11 +79,8 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         boolean recordVideo = this.options.getRecordVideo() != null && options.getRecordVideo();
 
         if (recordVideo) {
-            if (recordVideoPath != null) {
-                newContextOptions.setRecordVideoDir(recordVideoPath);
-            } else {
-                newContextOptions.setRecordVideoDir(Paths.get("build/videos"));
-            }
+            Path dir = requireNonNullElseGet(recordVideoPath, () -> Paths.get("build/videos"));
+            newContextOptions.setRecordVideoDir(dir);
         }
 
         if (locale != null) {
@@ -123,11 +119,8 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         }
 
         if (enableTracing != null && enableTracing) {
-            if (tracingOptions == null) {
-                browserContext.tracing().start(new TracingOptions().getStartOptions());
-            } else {
-                browserContext.tracing().start(tracingOptions.getStartOptions());
-            }
+            Tracing.StartOptions startOptions = requireNonNullElseGet(tracingOptions, TracingOptions::new).getStartOptions();
+            browserContext.tracing().start(startOptions);
         }
         page = browserContext.newPage();
     }
@@ -225,6 +218,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         return new PlaywrightWebElement(getLocatorFromBy(by).first());
     }
 
+    @Nullable
     private Locator getLocatorFromBy(By by) {
         String using = ((By.Remotable) by).getRemoteParameters().using();
         String value = ((By.Remotable) by).getRemoteParameters().value().toString();

@@ -6,7 +6,6 @@ import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
 import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDriverProvider;
-import org.brit.driver.PlaywrightiumDriver;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
 import org.openqa.selenium.Alert;
@@ -123,7 +122,6 @@ public class SelenideBasicTests {
 
         open("https://testpages.eviltester.com/styled/alerts/alert-test.html");
 
-        confirm();
         $(By.id("alertexamples")).click();
 
         Alert alert = webdriver().object().switchTo().alert();
