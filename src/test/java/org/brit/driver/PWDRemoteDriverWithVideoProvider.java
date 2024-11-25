@@ -5,12 +5,9 @@ import org.brit.options.PlaywrightiumOptions;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 
-import javax.annotation.Nonnull;
-
 public class PWDRemoteDriverWithVideoProvider implements WebDriverProvider {
-    @Nonnull
     @Override
-    public WebDriver createDriver(@Nonnull Capabilities capabilities) {
+    public WebDriver createDriver(Capabilities capabilities) {
         PlaywrightiumOptions chromeOptions = new PlaywrightiumOptions();
         chromeOptions.setConnectionByWS(false);
         chromeOptions.setHeadless(true);
