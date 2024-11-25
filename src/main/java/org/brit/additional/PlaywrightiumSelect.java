@@ -1,12 +1,10 @@
 package org.brit.additional;
 
 import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.options.SelectOption;
 import org.brit.element.PlaywrightWebElement;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ISelect;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
