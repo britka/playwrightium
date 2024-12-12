@@ -8,14 +8,12 @@ import org.brit.permission.Permissions;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 
 public class PWDriverProvider implements WebDriverProvider {
-    @Nonnull
     @Override
-    public WebDriver createDriver(@Nonnull Capabilities capabilities) {
+    public WebDriver createDriver(Capabilities capabilities) {
         PlaywrightiumOptions playwrightiumOptions = new PlaywrightiumOptions();
         playwrightiumOptions.setHeadless(false);
         playwrightiumOptions.setGeolocation(new Geolocation(46.655, 32.617));

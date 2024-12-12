@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+
+import org.jspecify.annotations.Nullable;
 import org.openqa.selenium.Alert;
 
 import java.util.LinkedList;
@@ -18,19 +20,15 @@ import java.util.function.Consumer;
  * @see <a href='https://playwright.dev/java/docs/dialogs'>Playwright. Using dialigs(alerts)</a>
  *
  */
-
 public class PlaywrightuimAlert implements Alert {
 
     private final PlaywrightiumDriver playwrightiumDriver;
-    private AtomicReference<String> text = new AtomicReference<>();
+    private final AtomicReference<String> text = new AtomicReference<>();
+    private final LinkedList<AlertAction> alertActions = new LinkedList<>();
+    private final Consumer<Dialog> handler;
+    private final AtomicReference<@Nullable String> textToSend = new AtomicReference<>();
 
-    private LinkedList<AlertAction> alertActions = new LinkedList<>();
-
-    private Consumer<Dialog> handler;
-
-    private AtomicReference<String> textToSend = new AtomicReference<>();
-
-    Consumer<Dialog> off = Dialog::dismiss;
+    private final Consumer<Dialog> off = Dialog::dismiss;
 
 
     public PlaywrightuimAlert(PlaywrightiumDriver playwrightiumDriver) {
@@ -47,7 +45,7 @@ public class PlaywrightuimAlert implements Alert {
                             dialog.dismiss();
                         }
                         case "accept" -> {
-                            if (textToSend != null) {
+                            if (textToSend.get() != null) {
                                 dialog.accept(textToSend.get());
                             } else {
                                 dialog.accept();
