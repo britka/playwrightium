@@ -144,7 +144,7 @@ public class SelenideActionsTests {
     private Boolean isElementVisibleInViewPort(SelenideElement element) {
         File script = new File(getClass().getClassLoader().getResource("is-element-visible.js").getPath());
         try {
-            return Boolean.parseBoolean(executeJavaScript(FileUtils.readFileToString(script, Charset.defaultCharset()), element));
+            return executeJavaScript(FileUtils.readFileToString(script, Charset.defaultCharset()), element);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

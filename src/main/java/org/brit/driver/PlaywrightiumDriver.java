@@ -1,6 +1,5 @@
 package org.brit.driver;
 
-import com.codeborne.selenide.impl.WebElementSource;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.Geolocation;
@@ -9,6 +8,8 @@ import com.microsoft.playwright.options.ViewportSize;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.text.CaseUtils;
+import org.brit.driver.adapters.JsExecutionAdapter;
+import org.brit.driver.adapters.FindElementAdapter;
 import org.brit.element.PlaywrightWebElement;
 import org.brit.emulation.Device;
 import org.brit.locators.ArialSearchOptions;
@@ -17,10 +18,12 @@ import org.brit.options.PlaywrightiumOptions;
 import org.brit.options.TracingOptions;
 import org.brit.permission.Permissions;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.logging.Logs;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.UnreachableBrowserException;
 
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -33,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.microsoft.playwright.options.WaitForSelectorState.ATTACHED;
+
 public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
     private Playwright playwright;
     private BrowserContext browserContext;
@@ -42,9 +47,9 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
     private Page activePage;
 
     private Frame mainFrameCopy = null;
-
+    private static final Locator.WaitForOptions elementExists = new Locator.WaitForOptions().setState(ATTACHED);
     private PlaywrightiumOptions options;
-
+    private final static JsExecutionAdapter jsExecutionAdapter = new JsExecutionAdapter();
 
     @SneakyThrows
     public PlaywrightiumDriver() {
@@ -210,19 +215,22 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public String getTitle() {
-        return page.title();
+        // Selenide uses getTitle() to check if the browser is alive, so it will be nice to properly re-throw the expected exception.
+        try {
+            return page.title();
+        } catch (PlaywrightException e) {
+            throw new UnreachableBrowserException(e.getMessage(), e);
+        }
     }
 
     @Override
     public List<WebElement> findElements(By by) {
-        return getLocatorFromBy(by).all()
-                .stream().map(PlaywrightWebElement::new)
-                .collect(Collectors.toUnmodifiableList());
+        return FindElementAdapter.findElements(getLocatorFromBy(by));
     }
 
     @Override
     public WebElement findElement(By by) {
-        return new PlaywrightWebElement(getLocatorFromBy(by).first());
+        return FindElementAdapter.findElement(getLocatorFromBy(by), by);
     }
 
     private Locator getLocatorFromBy(By by) {
@@ -364,14 +372,11 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         }
         List<Page> pages = PlaywrightiumDriver.this.page.context().pages();
         for (Page pageTemp : pages) {
-            Field guid = null;
             try {
-                guid = pageTemp.getClass().getSuperclass().getDeclaredField("guid");
+                Field guid = pageTemp.getClass().getSuperclass().getDeclaredField("guid");
                 guid.setAccessible(true);
                 handles.add(guid.get(pageTemp).toString());
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -549,25 +554,42 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public WebDriver frame(int index) {
-            Frame frame = page.frames().get(index);
+            Frame frame;
+            try {
+                frame = page.frames().get(index);
+            } catch (IndexOutOfBoundsException | TimeoutError e) {
+                throw new NoSuchFrameException("No frame at index " + index);
+            }
             setMainFrame(frame);
             return PlaywrightiumDriver.this;
         }
 
         @Override
         public WebDriver frame(String nameOrId) {
-            Locator frameLocator = page.locator("[name='%s'], #%s".formatted(nameOrId, nameOrId));
-            Frame frame = page.frame(frameLocator.getAttribute("name"));
+            Frame frame;
+            try {
+                Locator frameLocator = page.locator("[name='%s'], #%s".formatted(nameOrId, nameOrId));
+                frame = page.frame(frameLocator.getAttribute("name"));
+            } catch (TimeoutError e) {
+                throw new NoSuchFrameException(nameOrId);
+            }
             setMainFrame(frame);
             return PlaywrightiumDriver.this;
         }
 
         @Override
         public WebDriver frame(WebElement frameElement) {
-            PlaywrightWebElement element = (PlaywrightWebElement) frameElement;
-            String nameOrId = element.getLocator().getAttribute("id");
-            if (nameOrId == null) {
-                nameOrId = element.getLocator().getAttribute("name");
+            String nameOrId;
+            try {
+                nameOrId = frameElement.getAttribute("id");
+                if (nameOrId == null || nameOrId.isEmpty()) {
+                    nameOrId = frameElement.getAttribute("name");
+                }
+            } catch (TimeoutError e) {
+                throw new NoSuchFrameException(frameElement.toString(), e);
+            }
+            if (nameOrId == null || nameOrId.isEmpty() ) {
+                throw new NoSuchFrameException(frameElement.toString());
             }
             return frame(nameOrId);
         }
@@ -602,12 +624,14 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
                     if (guid.get(pageElement).toString().equals(nameOrHandle) || nameOrHandle.equals(evaluate)) {
                         pageElement.bringToFront();
                         PlaywrightiumDriver.this.page = pageElement;
+                        return PlaywrightiumDriver.this;
                     }
+
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             }
-            return PlaywrightiumDriver.this;
+            throw new NoSuchWindowException("No such window: " + nameOrHandle);
         }
 
         @Override
@@ -632,8 +656,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
         @Override
         public WebElement activeElement() {
-            ElementHandle element = page.evaluateHandle("() => document.activeElement").asElement();
-            return getPlaywrightElement(element);
+            return (WebElement) PlaywrightiumDriver.this.executeScript("() => document.activeElement");
         }
 
         @Override
@@ -876,107 +899,12 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Override
     public Object executeScript(String script, Object... args) {
-        script = script.trim().startsWith("return") ? script.replaceFirst("return", "") : script;
-        if (args.length > 0) {
-            var arguments = transformArguments(args);
-            JSHandle jsHandle = page.evaluateHandle("(arguments) => " + script, arguments);
-            if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof HTMLCollection").toString())) {
-                int length = (int) page.evaluate("node => node.length", jsHandle);
-                List<PlaywrightWebElement> list = new ArrayList<>();
-                for (int i = 0; i < length; i++) {
-                    list.add(getPlaywrightElement(page.evaluateHandle("node => node.item(%s)".formatted(i), jsHandle).asElement()));
-                }
-                return list;
-            } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof HTMLElement").toString())) {
-                return getPlaywrightElement(jsHandle.asElement());
-            } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof Array").toString())) {
-                int length = (int) page.evaluate("node => node.length", jsHandle);
-                List<String> list = new ArrayList<>();
-                for (int i = 0; i < length; i++) {
-                    Object evaluate = page.evaluate("node => node[%s]".formatted(i), jsHandle);
-                    list.add(evaluate != null ? evaluate.toString() : null);
-                }
-                return list;
-            } else if (Boolean.parseBoolean(jsHandle.evaluate("node => node instanceof Object").toString())) {
-                return jsHandle.jsonValue();
-            } else {
-                return jsHandle.toString();
-            }
-        } else {
-            return page.evaluate(script);
-        }
-        // return Map.of();
-    }
-
-    private List<Object> transformArguments(Object... args) {
-        List<Object> result = new LinkedList<>();
-        for (Object arg : args) {
-            ElementHandle elementHandle = null;
-            if (arg instanceof WebElementSource) {
-                elementHandle = ((PlaywrightWebElement) (((WebElementSource) arg).getWebElement())).getLocator().elementHandle();
-            } else if (arg instanceof WrapsElement) {
-                elementHandle = ((PlaywrightWebElement) (((WrapsElement) arg).getWrappedElement())).getElementHandle();
-            } else if (arg instanceof WebElement) {
-                Locator locator = ((PlaywrightWebElement) arg).getLocator();
-                elementHandle = locator.elementHandle();
-            } else if (arg instanceof Collection<?>) {
-                ArrayList<Object> arrayList = new ArrayList<>((Collection<?>) arg);
-                if (!arrayList.isEmpty() && arrayList.get(0) instanceof WebElement) {
-                    List<ElementHandle> list = arrayList.stream().map(e -> {
-                        Locator locator = ((PlaywrightWebElement) e).getLocator();
-                        return locator.elementHandle();
-                    }).toList();
-                    result.add(list);
-                    continue;
-                }
-            }
-            if (elementHandle != null) {
-                result.add(elementHandle);
-            } else {
-                if (arg instanceof Collection<?>) {
-                    ArrayList<Object> objects = new ArrayList<>((Collection<?>) arg);
-                    result.add(objects);
-                } else {
-                    result.add(arg);
-                }
-            }
-        }
-        return result;
+        return jsExecutionAdapter.executeScript(page, script, args);
     }
 
     @Override
     public Object executeAsyncScript(String script, Object... args) {
-        if (args.length > 0) {
-            return page.evaluate("async () => {" + script.replace("return", "") + "}", transformArguments(args));
-        } else {
-            return page.evaluate("async () => {" + script.replace("return", "") + "}");
-        }
-    }
-
-
-    public PlaywrightWebElement getPlaywrightElement(ElementHandle node) {
-        String string = page.evaluate("""
-                node =>
-                {
-                    names = [];                
-                    do {
-                        index = 0;
-                        cursorElement = node;
-                        while (cursorElement !== null) {
-                            ++index;
-                            cursorElement = cursorElement.previousElementSibling;
-                        }
-                        names.unshift(node.tagName + ":nth-child(" + index + ")");
-                        node = node.parentElement;
-                    } while (node !== null);
-                                
-                    return names.join(" > ");
-                }
-                """, node).toString();
-
-        Locator locator = page.locator(string);
-        return new PlaywrightWebElement(locator);
-
+        return jsExecutionAdapter.executeAsyncScript(page, script, args);
     }
 
     public PlaywrightiumOptions getOptions() {
