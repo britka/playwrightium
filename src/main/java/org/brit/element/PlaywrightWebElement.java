@@ -23,6 +23,9 @@ import java.util.regex.Pattern;
  * @see org.openqa.selenium.WebElement
  */
 public class PlaywrightWebElement extends RemoteWebElement {
+
+    private static final Pattern NOT_CHECKBOX_OR_RADIO = Pattern.compile("Not a checkbox or radio button");
+
     Locator locator;
     ElementHandle elementHandle;
 
@@ -115,7 +118,14 @@ public class PlaywrightWebElement extends RemoteWebElement {
 
     @Override
     public boolean isSelected() {
-        return locator.isChecked();
+        try {
+            return locator.isChecked();
+        } catch (PlaywrightException e) {
+            if (NOT_CHECKBOX_OR_RADIO.matcher(e.getMessage()).find()) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     @Override
