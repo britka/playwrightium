@@ -7,7 +7,10 @@ import org.openqa.selenium.support.ui.ISelect;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
+
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 /**
  * @author Serhii Bryt
@@ -41,7 +44,7 @@ public class PlaywrightiumSelect implements ISelect {
                 .locator("option")
                 .all()
                 .stream().map(PlaywrightWebElement::new)
-                .collect(Collectors.toUnmodifiableList());
+                .collect(toUnmodifiableList());
     }
 
     @Override
@@ -52,7 +55,7 @@ public class PlaywrightiumSelect implements ISelect {
                 .stream()
                 .filter(locator -> ((Boolean) locator.evaluate("node => node.selected")))
                 .map(PlaywrightWebElement::new)
-                .collect(Collectors.toUnmodifiableList());
+                .collect(toUnmodifiableList());
     }
 
     private Locator getOptionByIndex(int index) {
@@ -79,15 +82,35 @@ public class PlaywrightiumSelect implements ISelect {
 
     @Override
     public void selectByVisibleText(String text) {
-        Set<String> array = getAllSelectedOptions()
-                .stream()
-                .map(WebElement::getText)
-                .map(String::trim).collect(Collectors.toSet());
-        array.add(text);
         if (isMultiple()) {
+            Set<String> array = getAllSelectedOptions()
+                    .stream()
+                    .map(WebElement::getText)
+                    .map(String::trim)
+                    .collect(toSet());
+            array.add(text);
             element.selectOption(array.toArray(new String[]{}));
         } else {
             element.selectOption(text);
+        }
+    }
+
+    @Override
+    public void selectByContainsVisibleText(String text) {
+        if (isMultiple()) {
+            Set<String> array = getAllSelectedOptions().stream()
+                    .map(WebElement::getText)
+                    .map(String::trim)
+                    .collect(toSet());
+            array.add(text);
+            element.selectOption(array.toArray(new String[]{}));
+        } else {
+            getOptions().stream()
+                    .map(WebElement::getText)
+                    .map(String::trim)
+                    .filter(label -> label.contains(text))
+                    .findFirst()
+                    .ifPresent(label -> element.selectOption(label));
         }
     }
 
@@ -139,10 +162,19 @@ public class PlaywrightiumSelect implements ISelect {
 
     @Override
     public void deselectByVisibleText(String text) {
+        deselect(textElement -> !textElement.equals(text.trim()));
+    }
+
+    @Override
+    public void deSelectByContainsVisibleText(String text) {
+        deselect(textElement -> !textElement.contains(text.trim()));
+    }
+
+    private void deselect(Predicate<String> predicate) {
         String[] array = getAllSelectedOptions().stream()
                 .map(WebElement::getText)
                 .map(String::trim)
-                .filter(textElement -> !textElement.equals(text.trim()))
+                .filter(predicate)
                 .toArray(String[]::new);
         deselectAll();
         element.selectOption(array);
