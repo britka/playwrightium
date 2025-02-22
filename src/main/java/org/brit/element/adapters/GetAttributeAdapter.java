@@ -34,7 +34,8 @@ public class GetAttributeAdapter {
   public static String getAttribute(Locator locator, String name) {
     // sometimes relative href attribute is returned without leading /
     if (name.equals("href")) {
-      return String.valueOf(locator.evaluate("node => node.href"));
+      Object href = locator.evaluate("node => node.href");
+      return href != null ? String.valueOf(locator.evaluate("node => node.href")) : null;
     }
 
     if (booleanAttributes.contains(name)) {

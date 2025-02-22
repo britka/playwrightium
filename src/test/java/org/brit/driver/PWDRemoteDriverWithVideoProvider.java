@@ -12,6 +12,7 @@ public class PWDRemoteDriverWithVideoProvider implements WebDriverProvider {
         chromeOptions.setConnectionByWS(false);
         chromeOptions.setHeadless(true);
         chromeOptions.setRecordVideo(true);
+        chromeOptions.setEnableTracing(true);
         chromeOptions.merge(capabilities);
         //new PlaywrightiumDriver("http://moon.aerokube.local", chromeOptions);
         return new PlaywrightiumDriver("http://localhost:4444/wd/hub", chromeOptions);

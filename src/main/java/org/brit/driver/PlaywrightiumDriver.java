@@ -159,7 +159,8 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         String browserName = options.getBrowserName();
         boolean headless = options.getHeadless();
         boolean getConnectionType = options.getConnectionByWS() != null && options.getConnectionByWS();
-
+        Boolean enableTracing = this.options.getEnableTracing();
+        TracingOptions tracingOptions = this.options.getTracingOptions();
 
         Browser.NewContextOptions newContextOptions = new Browser.NewContextOptions().setAcceptDownloads(true);
         boolean recordVideo = options.getRecordVideo() != null && options.getRecordVideo();
@@ -193,6 +194,11 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
             browserContext = getBrowserType(browserName)
                     .launch(new BrowserType.LaunchOptions().setHeadless(headless))
                     .newContext(newContextOptions);
+        }
+
+        if (enableTracing != null && enableTracing) {
+            Tracing.StartOptions startOptions = requireNonNullElseGet(tracingOptions, TracingOptions::new).getStartOptions();
+            browserContext.tracing().start(startOptions);
         }
         page = browserContext.newPage();
     }
@@ -583,7 +589,7 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
             } catch (TimeoutError e) {
                 throw new NoSuchFrameException(frameElement.toString(), e);
             }
-            if (nameOrId == null || nameOrId.isEmpty() ) {
+            if (nameOrId == null || nameOrId.isEmpty()) {
                 throw new NoSuchFrameException(frameElement.toString());
             }
             return frame(nameOrId);

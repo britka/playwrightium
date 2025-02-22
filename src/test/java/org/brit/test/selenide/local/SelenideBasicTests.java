@@ -10,6 +10,7 @@ import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.testng.annotations.*;
 
 import java.io.File;
@@ -17,9 +18,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static com.codeborne.selenide.Condition.exactText;
-import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byId;
+import static com.codeborne.selenide.Selectors.byName;
 import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -173,6 +174,17 @@ public class SelenideBasicTests {
         $$(By.xpath("//ul/li")).shouldHave(CollectionCondition.size(elementsCount));
         switchTo().defaultContent();
         $$x("//frame").shouldHave(CollectionCondition.size(5));
+    }
+
+    @Test
+    public void issuesTest(){
+//        open("https://the-internet.herokuapp.com/upload");
+//        $("#file-submit").shouldNotHave(attribute("href"));
+//        open("https://dequeuniversity.com/library/aria/liveregion-playground");
+//        $("#default")
+//                .shouldHave(attribute("aria-describedby", "role-help"));
+        open("https://testpages.herokuapp.com/styled/basic-html-form-test.html");
+        $(byName("username")).sendKeys(Keys.ESCAPE, "Some text", Keys.ENTER);
     }
 
 
