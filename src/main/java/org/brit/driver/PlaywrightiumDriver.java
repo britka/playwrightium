@@ -32,11 +32,9 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.microsoft.playwright.options.WaitForSelectorState.ATTACHED;
 import static java.util.Objects.requireNonNullElseGet;
 
 public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreenshot, Interactive {
@@ -47,11 +45,9 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
     @Nullable
     private Frame mainFrameCopy = null;
-    private static final Locator.WaitForOptions elementExists = new Locator.WaitForOptions().setState(ATTACHED);
     private final PlaywrightiumOptions options;
     private final static JsExecutionAdapter jsExecutionAdapter = new JsExecutionAdapter();
 
-    @SneakyThrows
     public PlaywrightiumDriver() {
         this(new PlaywrightiumOptions());
     }
@@ -662,17 +658,6 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
 
 
     public class PlaywrightWebdriverTimeouts implements Timeouts {
-        public PlaywrightWebdriverTimeouts() {
-        }
-
-        @Override
-        public Timeouts implicitlyWait(long time, TimeUnit unit) {
-            long millis = Duration.of(time, unit.toChronoUnit()).toMillis();
-            page.setDefaultTimeout(millis);
-            page.context().setDefaultTimeout(millis);
-            return this;
-        }
-
         @Override
         public Timeouts implicitlyWait(Duration duration) {
             page.setDefaultTimeout(duration.toMillis());
@@ -681,36 +666,13 @@ public class PlaywrightiumDriver extends RemoteWebDriver implements TakesScreens
         }
 
         @Override
-        public Duration getImplicitWaitTimeout() {
-            return null;
-        }
-
-        @Override
-        public Timeouts setScriptTimeout(long time, TimeUnit unit) {
-            return null;
-        }
-
-        @Override
-        public Timeouts setScriptTimeout(Duration duration) {
-            return Timeouts.super.setScriptTimeout(duration);
-        }
-
-        @Override
         public Timeouts scriptTimeout(Duration duration) {
-            return Timeouts.super.scriptTimeout(duration);
+            throw new UnsupportedCommandException();
         }
 
         @Override
         public Duration getScriptTimeout() {
             return Timeouts.super.getScriptTimeout();
-        }
-
-        @Override
-        public Timeouts pageLoadTimeout(long time, TimeUnit unit) {
-            long millis = Duration.of(time, unit.toChronoUnit()).toMillis();
-            page.setDefaultNavigationTimeout(millis);
-            page.context().setDefaultNavigationTimeout(millis);
-            return this;
         }
 
         @Override
