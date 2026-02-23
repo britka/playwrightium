@@ -31,7 +31,7 @@ public final class SelenideVideoRecordLocalTests {
 
     @BeforeMethod
     @AfterMethod
-    public void beforeMethod(){
+    public void beforeMethod() {
         closeWebDriver();
         Configuration.browser = PWDriverWithVideoProvider.class.getName();
         Configuration.textCheck = FULL_TEXT;

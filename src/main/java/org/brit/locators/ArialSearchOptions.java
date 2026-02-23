@@ -24,12 +24,12 @@ public class ArialSearchOptions {
     public Boolean pressed;
     public Boolean selected;
 
-    public ArialSearchOptions setName(String name){
+    public ArialSearchOptions setName(String name) {
         this.name = name;
         return this;
     }
 
-    public ArialSearchOptions setName(Pattern name){
+    public ArialSearchOptions setName(Pattern name) {
         this.name = name;
         return this;
     }

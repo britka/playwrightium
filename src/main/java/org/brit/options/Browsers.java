@@ -1,5 +1,7 @@
 package org.brit.options;
 
+import lombok.Getter;
+
 import java.util.List;
 
 /**
@@ -16,14 +18,11 @@ public enum Browsers {
     MSEDGE_BETA_CHANNEL("msedge-beta"),
     MSEDGE_DEV_CHANNEL("msedge-dev");
 
-    private String value;
+    @Getter
+    private final String value;
 
-    private Browsers(String value) {
+    Browsers(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override
@@ -31,6 +30,6 @@ public enum Browsers {
         return getValue();
     }
 
-    public static List<String> channelBrowsers = List.of(CHROME_CHANNEL.getValue(), MSEDGE_CHANNEL.getValue(),
+    public static final List<String> channelBrowsers = List.of(CHROME_CHANNEL.getValue(), MSEDGE_CHANNEL.getValue(),
             CHROME_BETA_CHANNEL.getValue(), MSEDGE_BETA_CHANNEL.getValue(), MSEDGE_DEV_CHANNEL.getValue());
 }

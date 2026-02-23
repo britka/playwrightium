@@ -6,15 +6,14 @@ import com.microsoft.playwright.JSHandle;
 import com.microsoft.playwright.Page;
 import org.brit.element.converters.ElementHandleConverter;
 import org.brit.element.PlaywrightWebElement;
+import org.jspecify.annotations.Nullable;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class JsExecutionAdapter {
@@ -43,16 +42,12 @@ public class JsExecutionAdapter {
             }
             """).toString();
 
-    switch (type) {
-      case "HTMLCollection":
-        return processHtmlCollection(page, jsHandle);
-      case "HTMLElement":
-        return converter.toPwElement(page, jsHandle.asElement());
-      case "Array":
-        return processArray(page, jsHandle);
-      default:
-        return jsHandle.jsonValue();
-    }
+    return switch (type) {
+      case "HTMLCollection" -> processHtmlCollection(page, jsHandle);
+      case "HTMLElement" -> converter.toPwElement(page, jsHandle.asElement());
+      case "Array" -> processArray(page, jsHandle);
+      default -> jsHandle.jsonValue();
+    };
   }
 
   /**
@@ -83,7 +78,7 @@ public class JsExecutionAdapter {
         .toList();
   }
 
-  private List<String> processArray(Page page, JSHandle jsHandle) {
+  private List<@Nullable String> processArray(Page page, JSHandle jsHandle) {
     int length = (int) page.evaluate("node => node.length", jsHandle);
     return IntStream.range(0, length)
         .mapToObj(i -> Optional.ofNullable(page.evaluate("node => node['%s']".formatted(i), jsHandle)).map(Object::toString).orElse(null))
@@ -95,13 +90,6 @@ public class JsExecutionAdapter {
         .map(this::transformArgument)
         .toList();
   }
-
-  private final Map<Class<?>, Function<Object, Object>> argumentTransformers = Map.of(
-      WebElementSource.class, arg -> getElementHandleFrom((WebElementSource) arg),
-      WrapsElement.class, arg -> getElementHandleFrom((WrapsElement) arg),
-      WebElement.class, arg -> getElementHandleFrom((WebElement) arg),
-      Collection.class, arg -> transformCollection((Collection<?>) arg)
-  );
 
   private Object transformArgument(Object arg) {
     if (arg instanceof WebElementSource) {

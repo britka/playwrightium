@@ -1,7 +1,6 @@
 package org.brit.element.converters;
 
 import com.microsoft.playwright.ElementHandle;
-import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import org.brit.element.PlaywrightWebElement;
 
@@ -16,7 +15,7 @@ public class ElementHandleConverter {
     String string = page.evaluate("""
                 node =>
                 {
-                    names = [];                
+                    names = [];
                     do {
                         index = 0;
                         cursorElement = node;
@@ -27,7 +26,7 @@ public class ElementHandleConverter {
                         names.unshift(node.tagName + ":nth-child(" + index + ")");
                         node = node.parentElement;
                     } while (node !== null);
-                                
+
                     return names.join(" > ");
                 }
                 """, node).toString();

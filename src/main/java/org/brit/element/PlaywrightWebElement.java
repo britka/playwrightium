@@ -3,17 +3,18 @@ package org.brit.element;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.BoundingBox;
+import lombok.Getter;
 import org.apache.commons.text.CaseUtils;
 import org.brit.element.adapters.GetAttributeAdapter;
 import org.brit.driver.adapters.FindElementAdapter;
 import org.brit.locators.ArialSearchOptions;
+import org.jspecify.annotations.Nullable;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -27,8 +28,8 @@ public class PlaywrightWebElement extends RemoteWebElement {
 
     private static final Pattern NOT_CHECKBOX_OR_RADIO = Pattern.compile("Not a checkbox or radio button");
 
-    Locator locator;
-    ElementHandle elementHandle;
+    @Getter
+    private final Locator locator;
 
     public PlaywrightWebElement(Locator locator) {
         this.locator = locator;
@@ -105,6 +106,7 @@ public class PlaywrightWebElement extends RemoteWebElement {
         return String.valueOf(locator.evaluate("node => node.tagName")).toLowerCase();
     }
 
+    @Nullable
     @Override
     public String getAttribute(String name) {
         return GetAttributeAdapter.getAttribute(locator, name);
@@ -142,6 +144,7 @@ public class PlaywrightWebElement extends RemoteWebElement {
         return FindElementAdapter.findElement(getLocatorFromBy(by), by);
     }
 
+    @Nullable
     private Locator getLocatorFromBy(By by) {
         String using = ((By.Remotable) by).getRemoteParameters().using();
         String value = ((By.Remotable) by).getRemoteParameters().value().toString();
@@ -224,21 +227,18 @@ public class PlaywrightWebElement extends RemoteWebElement {
     @Override
     public Point getLocation() {
         BoundingBox boundingBox = locator.boundingBox();
-        Point point = new Point((int) boundingBox.x, (int) boundingBox.y);
-        return point;
+        return new Point((int) boundingBox.x, (int) boundingBox.y);
     }
 
     @Override
     public Dimension getSize() {
         BoundingBox boundingBox = locator.boundingBox();
-        Dimension dimension = new Dimension((int) boundingBox.width, (int) boundingBox.height);
-        return dimension;
+        return new Dimension((int) boundingBox.width, (int) boundingBox.height);
     }
 
     @Override
     public Rectangle getRect() {
-        Rectangle rectangle = new Rectangle(getLocation(), getSize());
-        return rectangle;
+        return new Rectangle(getLocation(), getSize());
     }
 
     @Override
@@ -254,19 +254,7 @@ public class PlaywrightWebElement extends RemoteWebElement {
     @Override
     public <X> X getScreenshotAs(OutputType<X> target) throws WebDriverException {
         byte[] screenshot = locator.screenshot();
-
-        if (target.getClass() == OutputType.FILE.getClass()) {
-            return target.convertFromPngBytes(screenshot);
-        } else if (target.getClass() == OutputType.BYTES.getClass()) {
-            return (X) screenshot;
-        } else if (target.getClass() == OutputType.BASE64.getClass()) {
-            return (X) Base64.getEncoder().encodeToString(screenshot);
-        }
-        return null;
-    }
-
-    public Locator getLocator() {
-        return locator;
+        return target.convertFromPngBytes(screenshot);
     }
 
     public ElementHandle getElementHandle() {
@@ -276,18 +264,19 @@ public class PlaywrightWebElement extends RemoteWebElement {
             Field selector = locator.getClass().getDeclaredField("selector");
             selector.setAccessible(true);
             String selectorString = selector.get(locator).toString();
-            elementHandle = page.querySelector(selectorString);
+            return page.querySelector(selectorString);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        return elementHandle;
     }
 
+    @Nullable
     @Override
     public String getDomAttribute(String name) {
         return GetAttributeAdapter.getDomAttribute(locator, name);
     }
 
+    @Nullable
     @Override
     public String getDomProperty(String name) {
         return GetAttributeAdapter.getDomProperty(locator, name);

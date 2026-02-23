@@ -67,6 +67,12 @@
             <artifactId>playwright</artifactId>
             <version>${playwright.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.opencv/opencv -->
         <dependency>
             <groupId>org.openpnp</groupId>

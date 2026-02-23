@@ -3,6 +3,7 @@ package org.brit.options;
 import com.microsoft.playwright.options.Geolocation;
 import org.brit.emulation.Device;
 import org.brit.permission.Permissions;
+import org.jspecify.annotations.Nullable;
 import org.openqa.selenium.MutableCapabilities;
 
 import java.nio.file.Path;
@@ -32,24 +33,24 @@ public class PlaywrightiumOptions extends MutableCapabilities {
 
     /**
      * Sets headless mode
-     * @param headless
      */
     public void setHeadless(boolean headless) {
         setCapability("headless", headless);
     }
 
+    @Nullable
     public Boolean getHeadless() {
         return (Boolean) getCapability("headless");
     }
 
     /**
      * Sets setIgnoreHTTPSErrors mode
-     * @param value
      */
     public void setIgnoreHTTPSErrors(boolean value) {
         setCapability(ACCEPT_INSECURE_CERTS, value);
     }
 
+    @Nullable
     public Boolean getIgnoreHTTPSErrors() {
         return (Boolean) getCapability(ACCEPT_INSECURE_CERTS);
     }
@@ -63,7 +64,7 @@ public class PlaywrightiumOptions extends MutableCapabilities {
         setCapability("browserName", browserName);
     }
 
-    public void setBrowserName(Browsers browserName){
+    public void setBrowserName(Browsers browserName) {
         setCapability("browserName", browserName.getValue());
     }
 
@@ -71,11 +72,12 @@ public class PlaywrightiumOptions extends MutableCapabilities {
      * Indicates whether to record video
      * @param recordVideo true - record video, false - not
      */
-    public void setRecordVideo(Boolean recordVideo){
+    public void setRecordVideo(Boolean recordVideo) {
         setCapability("recordVideo", recordVideo);
     }
 
-    public Boolean getRecordVideo(){
+    @Nullable
+    public Boolean getRecordVideo() {
         return (Boolean) getCapability("recordVideo");
     }
 
@@ -85,10 +87,12 @@ public class PlaywrightiumOptions extends MutableCapabilities {
      * This made to be compatible with Selenide
      * @param recordsFolder folder where to save video recordings
      */
-    public void setRecordsFolder(Path recordsFolder){
+    public void setRecordsFolder(Path recordsFolder) {
         setCapability("recordsFolder", recordsFolder);
     }
-    public Path getRecordsFolder(){
+
+    @Nullable
+    public Path getRecordsFolder() {
         return (Path) getCapability("recordsFolder");
     }
 
@@ -101,75 +105,85 @@ public class PlaywrightiumOptions extends MutableCapabilities {
      * @see <a href='https://aerokube.com/selenoid/latest/'>Aerokube Selenoid</a>
      * @see <a href='https://www.selenium.dev/documentation/grid/'>Selenium grid</a>
      */
-    public void setConnectionByWS(Boolean connectionByWS){
+    public void setConnectionByWS(Boolean connectionByWS) {
         setCapability("connectionByWS", connectionByWS);
     }
 
-    public Boolean getConnectionByWS(){
+    @Nullable
+    public Boolean getConnectionByWS() {
         return (Boolean) getCapability("connectionByWS");
     }
 
-    public void setEmulation(Device device){
+    public void setEmulation(Device device) {
         setCapability("emulation", device);
     }
 
-    public Device getEmulation(){
+    @Nullable
+    public Device getEmulation() {
         return (Device) getCapability("emulation");
     }
 
-    public void setLocale(Locale locale){
+    public void setLocale(Locale locale) {
         setCapability("locale", locale);
     }
 
-    public Locale getLocale(){
+    @Nullable
+    public Locale getLocale() {
         return (Locale) getCapability("locale");
     }
 
-    public void setTimeZone(TimeZone timeZone){
+    public void setTimeZone(TimeZone timeZone) {
         setCapability("timeZone", timeZone);
     }
 
-    public TimeZone getTimeZone(){
+    @Nullable
+    public TimeZone getTimeZone() {
         return (TimeZone) getCapability("timeZone");
     }
 
-    public void setGeolocation(Geolocation geolocation){
+    public void setGeolocation(Geolocation geolocation) {
         setCapability("geolocation", geolocation);
     }
 
-    public Geolocation getGeolocation(){
+    @Nullable
+    public Geolocation getGeolocation() {
         return (Geolocation) getCapability("geolocation");
     }
 
-    public void setPermissions(List<Permissions> permissions){
+    public void setPermissions(List<Permissions> permissions) {
         setCapability("permissions", permissions);
     }
 
-    public List<Permissions> getPermissions(){
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public List<Permissions> getPermissions() {
         return (List<Permissions>) getCapability("permissions");
     }
 
-    public void setEnableTracing(Boolean enableTracing){
+    public void setEnableTracing(Boolean enableTracing) {
         setCapability("enableTracing", enableTracing);
     }
 
-    public Boolean getEnableTracing(){
+    @Nullable
+    public Boolean getEnableTracing() {
        return (Boolean) getCapability("enableTracing");
     }
 
-    public void setTracingOptions(TracingOptions tracingOptions){
+    public void setTracingOptions(TracingOptions tracingOptions) {
         setCapability("tracingOptions", tracingOptions);
     }
 
-    public TracingOptions getTracingOptions(){
+    @Nullable
+    public TracingOptions getTracingOptions() {
         return (TracingOptions) getCapability("tracingOptions");
     }
 
-    public void setSkipDownloadBrowsers(Boolean doNotDownloadBrowsers){
+    public void setSkipDownloadBrowsers(Boolean doNotDownloadBrowsers) {
         setCapability("skipDownloadBrowsers", doNotDownloadBrowsers);
     }
 
-    public Boolean getSkipDownloadBrowsers(){
+    @Nullable
+    public Boolean getSkipDownloadBrowsers() {
         return (Boolean) getCapability("skipDownloadBrowsers");
     }
 

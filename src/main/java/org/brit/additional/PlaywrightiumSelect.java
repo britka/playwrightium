@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ISelect;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -72,7 +73,7 @@ public class PlaywrightiumSelect implements ISelect {
                 .stream()
                 .filter(p -> p.evaluate("node => node.value").equals(value))
                 .findFirst()
-                .get();
+                .orElseThrow(() -> new NoSuchElementException("Option with value not found: \"" + value + "\""));
     }
 
     @Override
