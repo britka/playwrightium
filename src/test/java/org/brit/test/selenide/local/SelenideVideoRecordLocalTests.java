@@ -2,8 +2,8 @@ package org.brit.test.selenide.local;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.testng.TextReport;
-import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
+import net.datafaker.Faker;
 import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDriverWithVideoProvider;
 import org.brit.locators.ArialSearchOptions;

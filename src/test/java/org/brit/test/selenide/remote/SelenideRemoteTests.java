@@ -2,8 +2,8 @@ package org.brit.test.selenide.remote;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.testng.TextReport;
-import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
+import net.datafaker.Faker;
 import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDRemoteDriverWithVideoProvider;
 import org.brit.locators.ArialSearchOptions;
@@ -67,7 +67,6 @@ public class SelenideRemoteTests {
     }
     @Test
     public void downloadSelenoidWithVideoRecordRemoteTest() throws IOException {
-
         Faker faker = new Faker();
         File test = File.createTempFile("test", null);
         String paragraph = faker.lorem().paragraph(6);
