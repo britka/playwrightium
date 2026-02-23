@@ -2,7 +2,6 @@ package org.brit.emulation;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.options.ViewportSize;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
@@ -10,7 +9,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Map;
 
 /**

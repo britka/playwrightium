@@ -1,5 +1,7 @@
 package org.brit.permission;
 
+import lombok.Getter;
+
 /**
  * Created by Serhii Bryt
  * 02.04.2024 14:40
@@ -21,13 +23,10 @@ public enum Permissions {
     CLIPBOARD_WRITE("clipboard-write"),
     PAYMENT_HANDLER("payment-handler");
 
-    private String value;
+    @Getter
+    private final String value;
 
     Permissions(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 }

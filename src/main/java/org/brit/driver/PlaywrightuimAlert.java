@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public class PlaywrightuimAlert implements Alert {
 
     private final PlaywrightiumDriver playwrightiumDriver;
-    private final AtomicReference<String> text = new AtomicReference<>();
+    private final AtomicReference<@Nullable String> text = new AtomicReference<>();
     private final LinkedList<AlertAction> alertActions = new LinkedList<>();
     private final Consumer<Dialog> handler;
     private final AtomicReference<@Nullable String> textToSend = new AtomicReference<>();

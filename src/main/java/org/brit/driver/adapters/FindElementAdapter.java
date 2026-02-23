@@ -20,9 +20,8 @@ public class FindElementAdapter {
     private static final Locator.WaitForOptions elementExists = new Locator.WaitForOptions().setState(ATTACHED);
 
     public static List<WebElement> findElements(Locator locator) {
-        List<WebElement> collect = null;
         try {
-            collect = locator.all()
+            return locator.all()
                     .stream().map(PlaywrightWebElement::new)
                     .collect(Collectors.toUnmodifiableList());
         } catch (PlaywrightException e) {
@@ -31,7 +30,6 @@ public class FindElementAdapter {
             }
             throw e;
         }
-        return collect;
     }
 
     public static WebElement findElement(Locator locator, By by) {

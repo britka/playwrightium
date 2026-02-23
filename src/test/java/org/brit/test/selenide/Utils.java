@@ -3,6 +3,7 @@ package org.brit.test.selenide;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.datafaker.Faker;
 import org.apache.commons.io.IOUtils;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class Utils {
         return mapper.convertValue(viewport, clazz);
     }
 
+    @Nullable
     public static File getLastRecordedFile() throws IOException {
         Path recordsFolder = Path.of("build/video");
 

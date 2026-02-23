@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.microsoft.playwright.options.AriaRole;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -20,13 +21,14 @@ import java.util.List;
 public abstract class PlaywrightiumBy extends By implements By.Remotable {
     private final By.Remotable.Parameters remoteParameters;
 
-    protected PlaywrightiumBy(String selector, AriaRole ariaRole, ArialSearchOptions pageAriaRoleOptions) {
+    protected PlaywrightiumBy(String selector, AriaRole ariaRole,
+                              @Nullable ArialSearchOptions pageAriaRoleOptions) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(ariaRole.toString()), "Must supply a not empty locator value.");
         this.remoteParameters = new By.Remotable.Parameters(selector,
                 List.of(ariaRole, pageAriaRoleOptions == null ? new ArialSearchOptions() : pageAriaRoleOptions));
     }
 
-    protected PlaywrightiumBy(String selector, String value, Boolean exact) {
+    protected PlaywrightiumBy(String selector, String value, @Nullable Boolean exact) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(value), "Must supply a not empty locator value.");
         this.remoteParameters = new By.Remotable.Parameters(selector, List.of(value, exact != null && exact));
     }
@@ -36,7 +38,7 @@ public abstract class PlaywrightiumBy extends By implements By.Remotable {
     }
 
     protected static class ByRole extends PlaywrightiumBy implements Serializable {
-        public ByRole(AriaRole ariaRole, ArialSearchOptions pageAriaRoleOptions) {
+        public ByRole(AriaRole ariaRole, @Nullable ArialSearchOptions pageAriaRoleOptions) {
             super("getByRole", ariaRole, pageAriaRoleOptions);
         }
 
@@ -46,7 +48,7 @@ public abstract class PlaywrightiumBy extends By implements By.Remotable {
     }
 
     protected static class ByAltText extends PlaywrightiumBy implements Serializable {
-        public ByAltText(String value, Boolean exact) {
+        public ByAltText(String value, @Nullable Boolean exact) {
             super("getByAltText", value, exact);
         }
 
@@ -57,7 +59,7 @@ public abstract class PlaywrightiumBy extends By implements By.Remotable {
 
 
     protected static class ByLabel extends PlaywrightiumBy implements Serializable {
-        public ByLabel(String value, Boolean exact) {
+        public ByLabel(String value, @Nullable Boolean exact) {
             super("getByLabel", value, exact);
         }
 
@@ -67,7 +69,7 @@ public abstract class PlaywrightiumBy extends By implements By.Remotable {
     }
 
     protected static class ByPlaceholder extends PlaywrightiumBy implements Serializable {
-        public ByPlaceholder(String value, Boolean exact) {
+        public ByPlaceholder(String value, @Nullable Boolean exact) {
             super("getByPlaceholder", value, exact);
         }
 
@@ -84,7 +86,7 @@ public abstract class PlaywrightiumBy extends By implements By.Remotable {
     }
 
     protected static class ByText extends PlaywrightiumBy implements Serializable {
-        public ByText(String value, Boolean exact) {
+        public ByText(String value, @Nullable Boolean exact) {
             super("getByText", value, exact);
         }
 
@@ -94,7 +96,7 @@ public abstract class PlaywrightiumBy extends By implements By.Remotable {
     }
 
     protected static class ByTitle extends PlaywrightiumBy implements Serializable {
-        public ByTitle(String value, Boolean exact) {
+        public ByTitle(String value, @Nullable Boolean exact) {
             super("getByTitle", value, exact);
         }
 

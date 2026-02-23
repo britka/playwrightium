@@ -25,7 +25,7 @@ public final class SelenideDevicesTests {
 
     @BeforeMethod
     @AfterMethod
-    public void afterMethod(){
+    public void afterMethod() {
         closeWebDriver();
         Configuration.textCheck = FULL_TEXT;
     }

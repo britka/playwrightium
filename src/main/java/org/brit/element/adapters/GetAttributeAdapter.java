@@ -1,6 +1,7 @@
 package org.brit.element.adapters;
 
 import com.microsoft.playwright.Locator;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 
@@ -14,11 +15,13 @@ public class GetAttributeAdapter {
       "truespeed", "willvalidate"
   );
 
+  @Nullable
   public static String getDomProperty(Locator locator,String name) {
     Object jsProp = locator.evaluate("node => node['%s']".formatted(name));
     return jsProp != null ? jsProp.toString() : null;
   }
 
+  @Nullable
   public static String getDomAttribute(Locator locator, String name) {
     Boolean isPresent = (Boolean) locator.evaluate("node => node.hasAttribute('%s')".formatted(name));
 
@@ -31,6 +34,7 @@ public class GetAttributeAdapter {
         : null;
   }
 
+  @Nullable
   public static String getAttribute(Locator locator, String name) {
     // sometimes relative href attribute is returned without leading /
     if (name.equals("href")) {

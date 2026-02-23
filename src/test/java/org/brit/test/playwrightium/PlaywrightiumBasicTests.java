@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 public class PlaywrightiumBasicTests {
 
+    @SuppressWarnings("NotNullFieldNotInitialized")
     static WebDriver driver;
 
     @BeforeClass
@@ -35,6 +37,7 @@ public class PlaywrightiumBasicTests {
     }
 
     @AfterClass
+    @SuppressWarnings("ConstantValue")
     public void afterClass() {
         if (driver != null) {
             driver.quit();
@@ -79,7 +82,7 @@ public class PlaywrightiumBasicTests {
         selectMulti.selectByIndex(firstItem);
         selectMulti.selectByIndex(secondItem);
 
-        List<String> selectMultyValues = selectMulti.getAllSelectedOptions().stream().map(p -> p.getAttribute("value")).toList();
+        List<String> selectMultiValues = selectMulti.getAllSelectedOptions().stream().map(p -> p.getAttribute("value")).toList();
 
         ISelect select = new PlaywrightiumSelect(driver.findElement(By.name("dropdown")));
         select.selectByValue("dd" + faker.number().numberBetween(1, 7));
@@ -100,13 +103,13 @@ public class PlaywrightiumBasicTests {
         assertThat(getWebElementTextById("_valuecomments", driver))
                 .isEqualTo(paragraph);
         assertThat(getWebElementsTextsBy("_valuecheckboxes", driver))
-                .asList()
-                .isEqualTo(List.of(checkBoxValue));
+                .asInstanceOf(LIST)
+                .containsExactly(checkBoxValue);
         assertThat(getWebElementTextById("_valueradioval", driver))
                 .isEqualTo(radioButtonValue);
         assertThat(getWebElementsTextsBy("_valuemultipleselect", driver))
-                .asList()
-                .isEqualTo(selectMultyValues);
+                .asInstanceOf(LIST)
+                .containsExactlyElementsOf(selectMultiValues);
         assertThat(getWebElementTextById("_valuedropdown", driver))
                 .isEqualTo(selectValue);
         assertThat(getWebElementTextById("_valuefilename", driver))
@@ -206,8 +209,6 @@ public class PlaywrightiumBasicTests {
     @Test
     public void actionTest() {
         driver.get("https://testpages.herokuapp.com/styled/basic-html-form-test.html");
-        String testMessage = "Test message 1";
-        String testMessage2 = "Test 2 message";
 
         WebElement comments = driver.findElement(By.name("comments"));
 
@@ -243,7 +244,7 @@ public class PlaywrightiumBasicTests {
     }
 
     @Test
-    public void sendKeysTest(){
+    public void sendKeysTest() {
         driver.get("https://google.com");
         WebElement element = driver.findElement(By.name("q"));
         element.sendKeys("Playwright.", "dev", Keys.ENTER);

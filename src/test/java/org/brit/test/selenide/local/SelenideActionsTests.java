@@ -12,6 +12,7 @@ import java.time.Duration;
 
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.TextCheck.FULL_TEXT;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.brit.test.selenide.Utils.js;
 import static org.brit.test.selenide.Utils.resource;
@@ -31,7 +32,7 @@ public final class SelenideActionsTests {
     }
 
     @AfterClass
-    public static void afterAll(){
+    public static void afterAll() {
         closeWebDriver();
     }
 
@@ -147,7 +148,7 @@ public final class SelenideActionsTests {
 
     private Boolean isElementVisibleInViewPort(SelenideElement element) throws IOException {
         String script = resource("/is-element-visible.js");
-        return executeJavaScript(script, element);
+        return requireNonNull(executeJavaScript(script, element));
     }
 
     private Viewport getVisualViewport() {
