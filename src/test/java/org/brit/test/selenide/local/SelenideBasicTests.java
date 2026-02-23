@@ -1,10 +1,12 @@
 package org.brit.test.selenide.local;
 
-import com.codeborne.selenide.*;
+import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.SelenideElement;
 import com.codeborne.selenide.testng.TextReport;
 import com.microsoft.playwright.options.AriaRole;
 import net.datafaker.Faker;
-import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDriverProvider;
 import org.brit.locators.ArialSearchOptions;
 import org.brit.locators.PlaywrightiumBy;
@@ -14,40 +16,37 @@ import org.testng.annotations.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 
 import static com.codeborne.selenide.CollectionCondition.size;
+import static com.codeborne.selenide.CollectionCondition.sizeGreaterThan;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byId;
 import static com.codeborne.selenide.Selectors.byTagAndText;
 import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.TextCheck.FULL_TEXT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
+import static org.brit.test.selenide.Utils.generateTextFile;
 
 @Listeners({TextReport.class})
-public class SelenideBasicTests {
+public final class SelenideBasicTests {
+    private final Faker faker = new Faker();
+
     @BeforeClass
+    @AfterClass
     public void beforeAll() {
         closeWebDriver();
-    }
-
-    @BeforeMethod
-    public void beforeMethod() {
         Configuration.browser = PWDriverProvider.class.getName();
-    }
-
-    @AfterClass
-    public void afterAll() {
-        closeWebDriver();
+        Configuration.timeout = 10000;
+        Configuration.headless = false;
+        Configuration.textCheck = FULL_TEXT;
     }
 
     @Test
     public void basicFunctionalTests() {
-        Configuration.timeout = 10000;
-        Configuration.headless = false;
-        final String url = "https://testpages.herokuapp.com/styled/basic-html-form-test.html";
-        open(url);
-        Faker faker = new Faker();
+        open("https://testpages.herokuapp.com/styled/basic-html-form-test.html");
+
         String name = faker.internet().emailAddress("some+2334777");
         String password = faker.credentials().password();
 
@@ -81,14 +80,13 @@ public class SelenideBasicTests {
         SelenideElement selectMulti = $(By.name("multipleselect[]"));
 
         selectMulti.selectOption(firstItem, secondItem);
-        List<String> selectMultyValues = selectMulti.getSelectedOptions().attributes("value");
+        List<String> selectMultiValues = selectMulti.getSelectedOptions().attributes("value");
 
         SelenideElement select = $(By.name("dropdown"));
         select.selectOptionByValue("dd" + faker.number().numberBetween(1, 7));
         String selectValue = select.getValue();
 
-        File file = new File(getClass().getClassLoader().getResource("textLorem.txt").getFile());
-        $(By.name("filename")).uploadFile(file);
+        $(By.name("filename")).uploadFromClasspath("textLorem.txt");
 
         $$("input[value=submit]")
                 .find(Condition.attribute("name", "submitbutton"))
@@ -99,12 +97,13 @@ public class SelenideBasicTests {
         assertThat(getWebElementTextById("_valuepassword")).isEqualTo(password);
         assertThat(getWebElementTextById("_valuecomments")).isEqualTo(paragraph);
         assertThat(getWebElementsTextsBy("_valuecheckboxes"))
-                .asList()
-                .hasSameElementsAs(List.of(checkBoxValue, checkBoxValue1));
+                .asInstanceOf(LIST)
+                .containsExactlyInAnyOrder(checkBoxValue, checkBoxValue1);
         assertThat(getWebElementTextById("_valueradioval")).isEqualTo(radioButtonValue);
-        assertThat(getWebElementsTextsBy("_valuemultipleselect")).asList().isEqualTo(selectMultyValues);
+        assertThat(getWebElementsTextsBy("_valuemultipleselect"))
+                .asInstanceOf(LIST)
+                .containsExactlyElementsOf(selectMultiValues);
         assertThat(getWebElementTextById("_valuedropdown")).isEqualTo(selectValue);
-
     }
 
     /*
@@ -154,14 +153,13 @@ public class SelenideBasicTests {
 
     @Test
     public void downloadTest() throws IOException {
-        Faker faker = new Faker();
-        File test = File.createTempFile("test", null);
-        String paragraph = faker.lorem().paragraph(6);
-        FileUtils.writeStringToFile(test, paragraph, Charset.defaultCharset());
+        File test = generateTextFile();
+
         open("https://the-internet.herokuapp.com/upload");
         $("#file-upload").uploadFile(test);
         $(PlaywrightiumBy.byRole(AriaRole.BUTTON, new ArialSearchOptions().setName("Upload"))).click();
         $("#uploaded-files").shouldHave(text(test.getName()));
+
         open("https://the-internet.herokuapp.com/download");
         File download = $(By.linkText(test.getName())).download();
         assertThat(test).hasSameTextualContentAs(download);
@@ -193,7 +191,7 @@ public class SelenideBasicTests {
 
     private List<String> getWebElementsTextsBy(String idMask) {
         return $$(By.xpath("//*[contains(@id, '%s')]".formatted(idMask)))
-                .shouldHave(CollectionCondition.sizeGreaterThan(1))
+                .shouldHave(sizeGreaterThan(1))
                 .texts();
     }
 
