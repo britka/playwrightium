@@ -17,9 +17,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static com.codeborne.selenide.Condition.exactText;
-import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.CollectionCondition.size;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byId;
+import static com.codeborne.selenide.Selectors.byTagAndText;
 import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -57,8 +58,9 @@ public class SelenideBasicTests {
         $("textarea[name=comments]").setValue(paragraph);
 
         int checkBoxNum = faker.number().numberBetween(1, 4);
-        ElementsCollection checkboxes = $$x("//input[@type='checkbox']");
-        checkboxes.filter(Condition.checked).forEach(SelenideElement::click);
+        ElementsCollection checkboxes = $$("#HTMLFormElements input[type='checkbox']");
+        checkboxes.shouldHave(size(3));
+        checkboxes.filter(checked).forEach(SelenideElement::click);
 
         SelenideElement checkBoxChecked = checkboxes.get(checkBoxNum - 1);
         SelenideElement checkBoxChecked1 = checkboxes.get(randomIntExcept(1, 4, checkBoxNum) - 1);
@@ -91,7 +93,7 @@ public class SelenideBasicTests {
         $$("input[value=submit]")
                 .find(Condition.attribute("name", "submitbutton"))
                 .click();
-        $x("//h1[contains(.,'Processed Form Details')]").shouldBe(Condition.visible);
+        $(byTagAndText("h2", "Submitted Values")).should(appear);
 
         assertThat(getWebElementTextById("_valueusername")).isEqualTo(name);
         assertThat(getWebElementTextById("_valuepassword")).isEqualTo(password);
@@ -170,9 +172,9 @@ public class SelenideBasicTests {
         open("https://testpages.eviltester.com/styled/frames/frames-test.html");
         switchTo().frame(frameName);
         $(By.xpath("//h1")).shouldHave(exactText(frameText));
-        $$(By.xpath("//ul/li")).shouldHave(CollectionCondition.size(elementsCount));
+        $$(By.xpath("//ul/li")).shouldHave(size(elementsCount));
         switchTo().defaultContent();
-        $$x("//frame").shouldHave(CollectionCondition.size(5));
+        $$x("//frame").shouldHave(size(5));
     }
 
 
