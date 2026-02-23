@@ -2,8 +2,8 @@ package org.brit.test.selenide.local;
 
 import com.codeborne.selenide.*;
 import com.codeborne.selenide.testng.TextReport;
-import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
+import net.datafaker.Faker;
 import org.apache.commons.io.FileUtils;
 import org.brit.driver.PWDriverProvider;
 import org.brit.locators.ArialSearchOptions;
@@ -49,7 +49,7 @@ public class SelenideBasicTests {
         open(url);
         Faker faker = new Faker();
         String name = faker.internet().emailAddress("some+2334777");
-        String password = faker.internet().password();
+        String password = faker.credentials().password();
 
         $(By.name("username")).setValue(name);
         $x("//input[@name='password']").setValue(password);

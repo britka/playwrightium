@@ -1,7 +1,7 @@
 package org.brit.test.playwrightium;
 
-import com.github.javafaker.Faker;
 import com.microsoft.playwright.options.AriaRole;
+import net.datafaker.Faker;
 import org.brit.additional.PlaywrightiumSelect;
 import org.brit.driver.PlaywrightiumDriver;
 import org.brit.locators.ArialSearchOptions;
@@ -49,7 +49,7 @@ public class PlaywrightiumBasicTests {
         driver.get(url);
 
         String name = faker.name().firstName();
-        String password = faker.internet().password();
+        String password = faker.credentials().password();
 
         driver.findElement(By.name("username")).sendKeys(name);
         driver.findElement(By.xpath("//input[@name='password']")).sendKeys(password);
