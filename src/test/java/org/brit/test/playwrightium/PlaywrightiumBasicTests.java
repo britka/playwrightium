@@ -13,6 +13,7 @@ import org.openqa.selenium.support.ui.ISelect;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -20,8 +21,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.codeborne.selenide.Selenide.$$;
-import static com.codeborne.selenide.Selenide.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PlaywrightiumBasicTests {
@@ -116,7 +115,7 @@ public class PlaywrightiumBasicTests {
     }
 
 
-    @Test(dataProvider = "dataProvider")
+    @Test(dataProvider = "frames")
     public void framesTest(String frameName, String frameText, int elementsCount) {
         driver.get("https://testpages.eviltester.com/styled/frames/frames-test.html");
         driver.switchTo().frame(frameName);
@@ -253,7 +252,8 @@ public class PlaywrightiumBasicTests {
         assertThat(until.stream().map(WebElement::getText).toList()).allMatch(s -> s.toLowerCase().contains("playwright"));
     }
 
-    private Object[][] dataProvider() {
+    @DataProvider(name = "frames")
+    private Object[][] frames() {
         return new Object[][]{
                 {"left", "Left", 30},
                 {"middle", "Middle", 40},
