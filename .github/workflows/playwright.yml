@@ -23,7 +23,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright/java:v1.43.0-jammy
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
